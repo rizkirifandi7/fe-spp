@@ -3,9 +3,9 @@
 import { useEffect, useCallback, useState } from "react";
 import axios from "axios";
 import TableView from "@/components/data-table/table-view";
-import TambahAdmin from "./components/tambah-admin";
-import UpdateAdmin from "./components/update-admin";
-import HapusAdmin from "./components/hapus-admin";
+import TambahAdmin from "./_components/tambah-admin";
+import UpdateAdmin from "./_components/update-admin";
+import HapusAdmin from "./_components/hapus-admin";
 
 const PageAdmin = () => {
 	const [data, setData] = useState([]);
@@ -113,7 +113,7 @@ const PageAdmin = () => {
 			);
 
 			const filterRole = response.data.data.filter(
-				(item) => item.role.role === "Admin"
+				(item) => item.role === "admin"
 			);
 
 			setData(filterRole);

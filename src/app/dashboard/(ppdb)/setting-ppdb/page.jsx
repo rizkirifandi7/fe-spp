@@ -112,15 +112,17 @@ const PageSettingPPDB = () => {
 	}, [fetchData]);
 
 	return (
-		<TableView
-			columns={columns}
-			data={data}
-			isLoading={isLoading}
-			error={error}
-			TambahComponent={<TambahSettingPPDB onSuccess={fetchData} />}
-			title="Dashboard PPDB Setting"
-			searchKey="tahun_ajaran"
-		/>
+		<div className="p-6 md:p-8">
+			<TableView
+				columns={columns}
+				data={data}
+				isLoading={isLoading}
+				error={error}
+				TambahComponent={<TambahSettingPPDB onSuccess={fetchData} />}
+				title="Dashboard PPDB Setting"
+				searchKey="tahun_ajaran"
+			/>
+		</div>
 	);
 };
 

@@ -6,6 +6,7 @@ import UpdatePPDB from "./update-ppdb-daftar";
 import HapusPPDB from "./hapus-ppdb-daftar";
 import TambahPPDB from "./tambah-ppdb-daftar";
 import TableView from "@/components/data-table/table-view";
+import { Badge } from "@/components/ui/badge";
 
 const TableDaftarPPDB = ({ onDataAdded }) => {
 	const [data, setData] = useState([]);
@@ -81,20 +82,27 @@ const TableDaftarPPDB = ({ onDataAdded }) => {
 			accessorKey: "status_pembayaran",
 			header: "Status Pembayaran",
 			cell: ({ row }) => {
-				const status = row.getValue("status_pembayaran");
+				const originalStatus = row.getValue("status_pembayaran");
+
+				if (!originalStatus) return <div>-</div>;
+
+				const isPaid = originalStatus === "paid";
+				const displayStatus = isPaid ? "Lunas" : "Belum Lunas";
+
+				const badgeClass = isPaid
+					? "bg-green-100 text-green-800 border-green-300"
+					: "bg-red-100 text-red-800 border-red-300";
+
 				return (
-					<div
-						className={`overflow-x-auto capitalize font-medium border px-2 py-0.5 rounded-sm text-center w-fit ${
-							status?.toLowerCase() === "paid"
-								? "bg-green-100 text-green-800 border-green-300"
-								: "bg-red-100 text-red-800 border-red-300"
-						}`}
+					<Badge
+						className={`overflow-x-auto capitalize font-medium border px-2 py-0.5 rounded-sm text-center w-fit ${badgeClass}`}
 					>
-						{status}
-					</div>
+						{displayStatus}
+					</Badge>
 				);
 			},
 		},
+		// ...existing code...
 		{
 			accessorKey: "status",
 			header: "Status",
@@ -103,22 +111,34 @@ const TableDaftarPPDB = ({ onDataAdded }) => {
 
 				// Define color schemes for each status
 				const statusStyles = {
-					registered: "bg-blue-100 text-blue-800 border-blue-300",
+					terdaftar: "bg-blue-100 text-blue-800 border-blue-300",
 					pending: "bg-yellow-100 text-yellow-800 border-yellow-300",
-					rejected: "bg-red-100 text-red-800 border-red-300",
-					accepted: "bg-green-100 text-green-800 border-green-300",
-					verification: "bg-purple-100 text-purple-800 border-purple-300",
+					ditolak: "bg-red-100 text-red-800 border-red-300",
+					diterima: "bg-green-100 text-green-800 border-green-300",
+					verifikasi: "bg-purple-100 text-purple-800 border-purple-300",
 				};
+
+				// Map English status to Indonesian status for display and style lookup
+				const statusMap = {
+					registered: "terdaftar",
+					pending: "pending",
+					rejected: "ditolak",
+					accepted: "diterima",
+					verification: "verifikasi",
+				};
+
+				const indonesianStatus = statusMap[status?.toLowerCase()] || status; // Fallback to original status if not found
+
 				const statusClass =
-					statusStyles[status?.toLowerCase()] ||
+					statusStyles[indonesianStatus] || // Use Indonesian status for style lookup
 					"bg-gray-100 text-gray-800 border-gray-300";
 
 				return (
-					<div
+					<Badge
 						className={`overflow-x-auto capitalize border px-2 py-0.5 font-medium rounded-sm text-center w-fit ${statusClass}`}
 					>
-						{status}
-					</div>
+						{indonesianStatus} {/* Display Indonesian status */}
+					</Badge>
 				);
 			},
 		},
@@ -168,17 +188,19 @@ const TableDaftarPPDB = ({ onDataAdded }) => {
 	}, [fetchData]);
 
 	return (
-		<TableView
-			columns={columns}
-			data={data}
-			isLoading={isLoading}
-			error={error}
-			TambahComponent={
-				<TambahPPDB onSuccess={fetchData} onDataAdded={onDataAdded} />
-			}
-			title="Data Pendaftar PPDB"
-			searchKey="nama"
-		/>
+		<div className="w-full max-w-[1560px] mx-auto">
+			<TableView
+				columns={columns}
+				data={data}
+				isLoading={isLoading}
+				error={error}
+				TambahComponent={
+					<TambahPPDB onSuccess={fetchData} onDataAdded={onDataAdded} />
+				}
+				title="Data Pendaftar PPDB"
+				searchKey="nama"
+			/>
+		</div>
 	);
 };
 

@@ -3,9 +3,9 @@
 import { useEffect, useCallback, useState } from "react";
 import axios from "axios";
 import TableView from "@/components/data-table/table-view";
-import TambahUnit from "./components/tambah-unit";
-import HapusUnit from "./components/hapus-unit";
-import UpdateUnit from "./components/update-unit";
+import TambahUnit from "./_components/tambah-unit";
+import HapusUnit from "./_components/hapus-unit";
+import UpdateUnit from "./_components/update-unit";
 
 const UnitPage = () => {
 	const [data, setData] = useState([]);

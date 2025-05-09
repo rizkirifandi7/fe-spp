@@ -1,15 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { ChevronsUpDown, Plus } from "lucide-react";
+import { Building } from "lucide-react"; // Added Building icon
 
 import {
 	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuLabel,
-	DropdownMenuSeparator,
-	DropdownMenuShortcut,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -19,13 +14,57 @@ import {
 	useSidebar,
 } from "@/components/ui/sidebar";
 
-export function TeamSwitcher({ teams }) {
+export function TeamSwitcher() {
+	// Removed teams prop
 	const { isMobile } = useSidebar();
-	const [activeTeam, setActiveTeam] = React.useState(teams[0]);
+	const [allTeams, setAllTeams] = React.useState([]);
+	const [activeTeam, setActiveTeam] = React.useState(null); // Initialize as null
+
+	React.useEffect(() => {
+		const fetchTeams = async () => {
+			try {
+				const response = await fetch("http://localhost:8010/sekolah");
+				if (!response.ok) {
+					throw new Error(`HTTP error! status: ${response.status}`);
+				}
+				const result = await response.json();
+				if (result.data && Array.isArray(result.data)) {
+					const transformedTeams = result.data.map((school) => ({
+						id: school.id,
+						name: school.nama_sekolah,
+						logo: Building,
+					}));
+					setAllTeams(transformedTeams);
+					if (transformedTeams.length > 0) {
+						setActiveTeam(transformedTeams[0]);
+					} else {
+						setActiveTeam(null);
+					}
+				} else {
+					console.warn(
+						"No team data found or data is not an array:",
+						result.message
+					);
+					setAllTeams([]);
+					setActiveTeam(null);
+				}
+			} catch (error) {
+				console.error("Failed to fetch teams:", error);
+				setAllTeams([]);
+				setActiveTeam(null);
+			}
+		};
+
+		fetchTeams();
+	}, []); // Empty dependency array to run once on mount
 
 	if (!activeTeam) {
+		// Optionally, return a loading indicator or null
 		return null;
+		// return <p>Loading teams...</p>;
 	}
+
+	const ActiveTeamLogo = activeTeam.logo; // Get the logo component
 
 	return (
 		<SidebarMenu>
@@ -37,47 +76,16 @@ export function TeamSwitcher({ teams }) {
 							className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
 						>
 							<div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-								<activeTeam.logo className="size-4" />
+								<ActiveTeamLogo className="size-4" />
 							</div>
 							<div className="grid flex-1 text-left text-sm leading-tight">
 								<span className="truncate font-semibold">
 									{activeTeam.name}
 								</span>
-								<span className="truncate text-xs">{activeTeam.plan}</span>
+								<span className="truncate text-xs">Dashboard</span>
 							</div>
-							<ChevronsUpDown className="ml-auto" />
 						</SidebarMenuButton>
 					</DropdownMenuTrigger>
-					<DropdownMenuContent
-						className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-						align="start"
-						side={isMobile ? "bottom" : "right"}
-						sideOffset={4}
-					>
-						<DropdownMenuLabel className="text-xs text-muted-foreground">
-							Teams
-						</DropdownMenuLabel>
-						{teams.map((team, index) => (
-							<DropdownMenuItem
-								key={team.name}
-								onClick={() => setActiveTeam(team)}
-								className="gap-2 p-2"
-							>
-								<div className="flex size-6 items-center justify-center rounded-sm border">
-									<team.logo className="size-4 shrink-0" />
-								</div>
-								{team.name}
-								<DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
-							</DropdownMenuItem>
-						))}
-						<DropdownMenuSeparator />
-						<DropdownMenuItem className="gap-2 p-2">
-							<div className="flex size-6 items-center justify-center rounded-md border bg-background">
-								<Plus className="size-4" />
-							</div>
-							<div className="font-medium text-muted-foreground">Add team</div>
-						</DropdownMenuItem>
-					</DropdownMenuContent>
 				</DropdownMenu>
 			</SidebarMenuItem>
 		</SidebarMenu>

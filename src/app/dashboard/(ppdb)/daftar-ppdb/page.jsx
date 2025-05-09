@@ -8,7 +8,7 @@ const PageDaftarPPDB = () => {
 	const [refreshKey, setRefreshKey] = useState(0);
 
 	return (
-		<div className="flex flex-col gap-4">
+		<div className="flex flex-col gap-4 p-6 md:p-8 ">
 			<CardInfoPPDB refreshKey={refreshKey} />
 			<TableDaftarPPDB onDataAdded={() => setRefreshKey((prev) => prev + 1)} />
 		</div>

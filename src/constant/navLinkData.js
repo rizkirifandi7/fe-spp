@@ -9,6 +9,11 @@ import {
 	Wallet,
 	Mail,
 	Dot,
+	HandCoins,
+	Book,
+	BellDot,
+	Banknote,
+	FileCog,
 } from "lucide-react";
 
 export const dataNavLink = {
@@ -67,7 +72,31 @@ export const dataNavLink = {
 			url: "/dashboard/kas",
 			icon: Wallet,
 		},
-
+		{
+			title: "Pembayaran",
+			url: "/dashboard/pembayaran",
+			icon: HandCoins,
+		},
+		// {
+		// 	title: "Laporan",
+		// 	url: "/dashboard/laporan",
+		// 	icon: Book,
+		// },
+		{
+			title: "Tagihan",
+			url: "#",
+			icon: Banknote,
+			items: [
+				{
+					title: "Tunggakan",
+					url: "/dashboard/tunggakan",
+				},
+				{
+					title: "Buat Tagihan",
+					url: "/dashboard/buat-tagihan",
+				},
+			],
+		},
 		{
 			title: "Master Data",
 			url: "#",
@@ -86,10 +115,6 @@ export const dataNavLink = {
 					url: "/dashboard/siswa",
 				},
 				{
-					title: "Role",
-					url: "/dashboard/role",
-				},
-				{
 					title: "Kelas",
 					url: "/dashboard/kelas",
 				},
@@ -101,16 +126,9 @@ export const dataNavLink = {
 					title: "Jurusan",
 					url: "/dashboard/jurusan",
 				},
-				{
-					title: "Mata Pelajaran",
-					url: "/dashboard/mata-pelajaran",
-				},
-				{
-					title: "Bulan",
-					url: "/dashboard/bulan",
-				},
 			],
 		},
+
 		{
 			title: "Settings",
 			url: "#",

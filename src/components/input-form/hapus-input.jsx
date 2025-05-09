@@ -67,7 +67,7 @@ const DeleteDialog = ({
 								<Button
 									variant="outline"
 									size="icon"
-									className={` border-red-500 shadow-none hover:text-destructive cursor-pointer ${triggerClassName}`}
+									className={` cursor-pointer ${triggerClassName}`}
 									onClick={() => setIsOpen(true)} // Manually control dialog opening
 								>
 									<Trash2 className="h-4 w-4" />

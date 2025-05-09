@@ -3,9 +3,9 @@
 import { useEffect, useCallback, useState } from "react";
 import axios from "axios";
 import TableView from "@/components/data-table/table-view";
-import TambahAdmin from "./components/tambah-guru";
-import UpdateAdmin from "./components/update-guru";
-import HapusAdmin from "./components/hapus-guru";
+import TambahAdmin from "./_components/tambah-guru";
+import UpdateAdmin from "./_components/update-guru";
+import HapusAdmin from "./_components/hapus-guru";
 
 const PageGuru = () => {
 	const [data, setData] = useState([]);
@@ -113,7 +113,7 @@ const PageGuru = () => {
 			);
 
 			const filterRole = response.data.data.filter(
-				(item) => item.role.role === "Guru"
+				(item) => item.role === "guru"
 			);
 
 			console.log(filterRole);

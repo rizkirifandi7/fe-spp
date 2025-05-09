@@ -23,9 +23,6 @@ export function AppSidebar({ ...props }) {
 			<SidebarContent>
 				<NavMain items={dataNavLink.navMain} />
 			</SidebarContent>
-			<SidebarFooter>
-				<NavUser user={dataNavLink.user} />
-			</SidebarFooter>
 			<SidebarRail />
 		</Sidebar>
 	);

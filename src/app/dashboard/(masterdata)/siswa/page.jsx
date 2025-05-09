@@ -3,11 +3,22 @@
 import { useEffect, useCallback, useState } from "react";
 import axios from "axios";
 import TableView from "@/components/data-table/table-view";
-import TambahSiswa from "./components/tambah-siswa";
-import HapusSiswa from "./components/hapus-siswa";
-import UpdateSiswa from "./components/update-siswa";
+import TambahSiswa from "./_components/tambah-siswa";
+import HapusSiswa from "./_components/hapus-siswa";
+import UpdateSiswa from "./_components/update-siswa";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import { Eye } from "lucide-react";
+
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const PageSiswa = () => {
+	const router = useRouter();
 	const [data, setData] = useState([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState(null);
@@ -72,7 +83,7 @@ const PageSiswa = () => {
 			accessorKey: "tgl_lahir",
 			header: "Tanggal Lahir",
 			cell: ({ row }) => {
-				const dateValue = row.getValue("tgl_lahir");
+				const dateValue = row.original?.akun_siswa?.tgl_lahir;
 				if (!dateValue) return <div>-</div>;
 
 				const date = new Date(dateValue);
@@ -99,7 +110,7 @@ const PageSiswa = () => {
 		},
 		{
 			accessorKey: "gambar",
-			header: "foto",
+			header: "Foto",
 			cell: ({ row }) => (
 				<div className=" overflow-x-auto">{row.getValue("gambar")}</div>
 			),
@@ -130,6 +141,25 @@ const PageSiswa = () => {
 				const rowData = row.original;
 				return (
 					<div className="flex items-center gap-2">
+						<TooltipProvider>
+							<Tooltip>
+								<TooltipTrigger asChild>
+									<Button
+										variant="outline"
+										size="icon"
+										className={"cursor-pointer"}
+										onClick={() =>
+											router.push(`/dashboard/siswa/detail-siswa/${id}`)
+										}
+									>
+										<Eye />
+									</Button>
+								</TooltipTrigger>
+								<TooltipContent>
+									<p>Detail Siswa</p>
+								</TooltipContent>
+							</Tooltip>
+						</TooltipProvider>
 						<UpdateSiswa onSuccess={fetchData} id={id} rowData={rowData} />
 						<HapusSiswa id={id} onSuccess={fetchData} />
 					</div>

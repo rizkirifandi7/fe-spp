@@ -3,9 +3,9 @@
 import { useEffect, useCallback, useState } from "react";
 import axios from "axios";
 import TableView from "@/components/data-table/table-view";
-import HapusKelas from "./components/hapus-kelas";
-import UpdateKelas from "./components/update-kelas";
-import TambahKelas from "./components/tambah-kelas";
+import HapusKelas from "./_components/hapus-kelas";
+import UpdateKelas from "./_components/update-kelas";
+import TambahKelas from "./_components/tambah-kelas";
 
 const PageKelas = () => {
 	const [data, setData] = useState([]);

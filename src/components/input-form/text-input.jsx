@@ -38,7 +38,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { PlusCircle, Pencil } from "lucide-react";
+import { Plus, Pencil } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { useState } from "react";
@@ -215,14 +215,14 @@ const GenericFormDialog = ({
 
 		switch (triggerVariant) {
 			case "add":
-				icon = <PlusCircle className="h-4 w-4" />;
+				icon = <Plus className="h-4 w-4" />;
 				buttonText = buttonText || "Tambah";
-				buttonClassName = " text-white cursor-pointer";
+				buttonClassName = "bg-emerald-600 text-white cursor-pointer";
 				break;
 			case "edit":
 				icon = <Pencil className="h-4 w-4" />;
 				variant = "outline";
-				buttonClassName = "border-yellow-300 cursor-pointer shadow-none";
+				buttonClassName = "cursor-pointer";
 				buttonSize = "icon";
 				tooltipInfo = "Edit";
 				break;
@@ -308,7 +308,7 @@ const GenericFormDialog = ({
 							/>
 						))}
 						<DialogFooter className="mt-4 col-span-2">
-							<Button type="submit" className="w-full">
+							<Button type="submit" className="w-full bg-emerald-600">
 								Submit
 							</Button>
 						</DialogFooter>
