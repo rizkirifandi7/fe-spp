@@ -12,9 +12,13 @@ export function middleware(request) {
 		return NextResponse.redirect(new URL("/login", request.url));
 	}
 
+	if (!token && pathname.startsWith("/dashboard-siswa")) {
+		return NextResponse.redirect(new URL("/login", request.url));
+	}
+
 	return NextResponse.next();
 }
 
 export const config = {
-	matcher: ["/dashboard/:path*", "/"],
+	matcher: ["/dashboard/:path*", "/dashboard-siswa/:path*", "/"],
 };

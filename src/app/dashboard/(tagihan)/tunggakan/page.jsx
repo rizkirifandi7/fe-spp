@@ -179,8 +179,8 @@ export default function TagihanSiswaPage() {
 	}
 
 	return (
-		<div className="min-h-screen  dark:from-slate-900 dark:to-black py-8">
-			<div className="container mx-auto px-4 space-y-8">
+		<div className="min-h-screen  dark:from-slate-900 dark:to-black">
+			<div className="container mx-auto space-y-8">
 				{/* Header */}
 				<div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
 					<div>
@@ -271,7 +271,7 @@ export default function TagihanSiswaPage() {
 							value: filteredData.filter((item) => item.status === "paid")
 								.length,
 							desc: "Tagihan yang sudah terbayar",
-							color: "text-green-600 dark:text-green-400",
+							color: "text-slate-800 dark:text-green-400",
 						},
 						{
 							title: "Tagihan Belum Lunas",
@@ -281,7 +281,7 @@ export default function TagihanSiswaPage() {
 							value: filteredData.filter((item) => item.status !== "paid")
 								.length,
 							desc: "Tagihan menunggu pembayaran atau belum lunas",
-							color: "text-yellow-600 dark:text-yellow-400",
+							color: "text-slate-800 dark:text-yellow-400",
 						},
 					].map((stat, i) => (
 						<CardStatistik key={i} stat={stat} i={i} />

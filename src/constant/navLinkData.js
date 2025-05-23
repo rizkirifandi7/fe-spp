@@ -107,10 +107,6 @@ export const dataNavLink = {
 					url: "/dashboard/admin",
 				},
 				{
-					title: "Guru",
-					url: "/dashboard/guru",
-				},
-				{
 					title: "Siswa",
 					url: "/dashboard/siswa",
 				},
@@ -139,6 +135,23 @@ export const dataNavLink = {
 					url: "/dashboard/aplikasi",
 				},
 			],
+		},
+	],
+	navSiswaMain: [
+		{
+			title: "Dashboard",
+			url: "/dashboard-siswa/home",
+			icon: House,
+		},
+		{
+			title: "Tagihan",
+			url: "/dashboard-siswa/tagihan",
+			icon: HandCoins,
+		},
+		{
+			title: "Profil",
+			url: "/dashboard-siswa/profil",
+			icon: Users,
 		},
 	],
 };

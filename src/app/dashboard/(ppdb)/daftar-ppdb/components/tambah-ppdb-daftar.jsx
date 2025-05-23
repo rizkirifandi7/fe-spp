@@ -3,9 +3,11 @@
 import { z } from "zod";
 import GenericFormDialog from "@/components/input-form/text-input";
 import { useUnits } from "@/hooks/useUnits";
+import { usePpdbs } from "@/hooks/usePpdb";
 
 const kelasFormSchema = z.object({
 	id_ppdb: z.string().min(1, "Unit harus dipilih"),
+	id_unit: z.string().min(1, "Unit harus dipilih"),
 	nik: z.string().min(1, "NIK harus diisi"),
 	nama: z.string().min(1, "Nama harus diisi"),
 	email: z.string().email("Email tidak valid"),
@@ -32,6 +34,7 @@ const kelasFormSchema = z.object({
 
 const TambahPPDB = ({ onSuccess, onDataAdded }) => {
 	const { units, loading: loadingUnits, error: unitsError } = useUnits();
+	const { ppdbs, loading: loadingPpdbs, error: ppdbsError } = usePpdbs();
 
 	const handleSubmit = async (values) => {
 		try {
@@ -81,6 +84,20 @@ const TambahPPDB = ({ onSuccess, onDataAdded }) => {
 			fields={[
 				{
 					name: "id_ppdb",
+					label: "PPDB",
+					placeholder: loadingPpdbs ? "Memuat data ppdb..." : "Pilih ppdb...",
+					fieldType: "select",
+					options: ppdbs.map((ppdb) => ({
+						value: ppdb.id,
+						label: ppdb.jumlah_pembayaran,
+					})),
+					disabled: loadingPpdbs,
+					description: loadingPpdbs
+						? "Sedang memuat data unit..."
+						: "Pilih PPDB Pembayaran untuk kelas ini",
+				},
+				{
+					name: "id_unit",
 					label: "Unit",
 					placeholder: loadingUnits ? "Memuat data unit..." : "Pilih unit...",
 					fieldType: "select",

@@ -208,12 +208,6 @@ export const FilterPencarian = ({
 								value="pending"
 								className="dark:focus:bg-green-900/30"
 							>
-								Menunggu
-							</SelectItem>
-							<SelectItem
-								value="belum_lunas"
-								className="dark:focus:bg-green-900/30"
-							>
 								Belum Lunas
 							</SelectItem>
 						</SelectContent>

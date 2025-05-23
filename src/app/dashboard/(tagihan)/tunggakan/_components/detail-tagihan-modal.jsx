@@ -122,7 +122,7 @@ Tim Keuangan Sekolah
 			const response = await fetch("https://api.fonnte.com/send", {
 				method: "POST",
 				headers: {
-					Authorization: "QqrpmALC8wz9WvyeqtBF", // Ganti dengan API Key Fonnte Anda
+					Authorization: process.env.NEXT_PUBLIC_TOKEN_FONNTE, // Ganti dengan API Key Fonnte Anda
 				},
 				body: formData,
 			});

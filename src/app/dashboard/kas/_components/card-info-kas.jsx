@@ -118,7 +118,7 @@ const CardInfoKas = ({ refreshKey }) => {
 				value={totalMasuk}
 				description={`${countMasuk} transaksi masuk`}
 				icon={ArrowDownCircle}
-				colorClass="text-emerald-600 dark:text-emerald-500"
+				colorClass="dark:text-emerald-500"
 				isLoading={loading}
 			/>
 			<StatCard
@@ -126,7 +126,7 @@ const CardInfoKas = ({ refreshKey }) => {
 				value={totalKeluar}
 				description={`${countKeluar} transaksi keluar`}
 				icon={ArrowUpCircle}
-				colorClass="text-red-600 dark:text-red-500"
+				colorClass=" dark:text-red-500"
 				isLoading={loading}
 			/>
 			<StatCard
@@ -134,7 +134,7 @@ const CardInfoKas = ({ refreshKey }) => {
 				value={saldoAkhir}
 				description="Total saldo kas saat ini"
 				icon={Wallet}
-				colorClass="text-blue-600 dark:text-blue-500"
+				colorClass=" dark:text-blue-500"
 				isLoading={loading}
 			/>
 		</div>

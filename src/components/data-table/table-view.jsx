@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react"; // Pastikan React diimpor jika belum
 import {
 	flexRender,
 	getCoreRowModel,
@@ -19,82 +19,76 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card } from "../ui/card";
+import { Card } from "@/components/ui/card"; // Card digunakan untuk membungkus tabel
+import { AlertTriangle, Search, Loader2, Info } from "lucide-react"; // Mengimpor ikon yang dibutuhkan
+
+// Diasumsikan cn utility sudah ada di "@/lib/utils"
+const cn = (...inputs) => inputs.filter(Boolean).join(" ");
 
 const TableView = ({
 	columns,
 	data,
 	title,
-	searchKey,
-	TambahComponent,
+	searchKey, // Kunci kolom yang akan digunakan untuk filter global
+	TambahComponent, // Komponen untuk tombol "Tambah Data" atau sejenisnya
 	pageSize = 10,
 	isLoading = false,
 	error = null,
 }) => {
 	const [sorting, setSorting] = useState([]);
 	const [columnFilters, setColumnFilters] = useState([]);
-	const [columnVisibility, setColumnVisibility] = useState({});
+	// const [columnVisibility, setColumnVisibility] = useState({}); // Tidak digunakan di JSX, bisa di-uncomment jika perlu
 	const [rowSelection, setRowSelection] = useState({});
+	const [globalFilter, setGlobalFilter] = useState(""); // State untuk filter global
 
 	const table = useReactTable({
 		data,
 		columns,
 		onSortingChange: setSorting,
-		onColumnFiltersChange: setColumnFilters,
+		onColumnFiltersChange: setColumnFilters, // Untuk filter per kolom jika diimplementasikan
+		onGlobalFilterChange: setGlobalFilter, // Untuk filter global
 		getCoreRowModel: getCoreRowModel(),
 		getPaginationRowModel: getPaginationRowModel(),
 		getSortedRowModel: getSortedRowModel(),
 		getFilteredRowModel: getFilteredRowModel(),
-		onColumnVisibilityChange: setColumnVisibility,
+		// onColumnVisibilityChange: setColumnVisibility, // Tidak digunakan di JSX
 		onRowSelectionChange: setRowSelection,
 		state: {
 			sorting,
 			columnFilters,
-			columnVisibility,
+			// columnVisibility, // Tidak digunakan di JSX
 			rowSelection,
+			globalFilter, // Menambahkan globalFilter ke state tabel
 		},
 		initialState: {
 			pagination: {
 				pageSize,
 			},
 		},
+		// Jika searchKey tidak spesifik ke satu kolom, tapi filter global
+		// maka kita tidak perlu getColumn(searchKey) lagi.
+		// TanStack Table v8 menangani filter global melalui state.globalFilter
 	});
 
 	return (
-		<div className="space-y-6 p-4 md:p-6 rounded-lg shadow-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
-			<div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-700 pb-4">
-				<h1 className="text-xl font-bold text-slate-800 dark:text-slate-100">
+		<div className="space-y-6 p-4 md:p-6 rounded-xl shadow-sm dark:bg-gray-950 border border-gray-200 dark:border-slate-800">
+			<div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-gray-200 dark:border-slate-700 pb-5">
+				<h1 className="text-xl md:text-2xl font-bold text-gray-800 dark:text-slate-100">
 					{title}
 				</h1>
 			</div>
 
 			<div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-				<div className="relative w-full sm:max-w-xs">
+				<div className="relative w-full sm:max-w-md">
 					<Input
 						placeholder={`Cari ${searchKey || "data"}...`}
-						value={table.getColumn(searchKey)?.getFilterValue() ?? ""}
-						onChange={(e) =>
-							table.getColumn(searchKey)?.setFilterValue(e.target.value)
-						}
-						className="pl-10 pr-4 py-2 shadow-sm border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-800 dark:text-slate-200 rounded-md"
+						value={globalFilter ?? ""}
+						onChange={(e) => setGlobalFilter(e.target.value)}
+						className="pl-10 pr-4 py-2.5 shadow-sm border-gray-300 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white dark:bg-slate-800 dark:text-slate-100 rounded-lg text-sm"
 						disabled={isLoading}
 					/>
 					<div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-						{/* You can use an SVG icon here for search */}
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							fill="none"
-							viewBox="0 0 24 24"
-							strokeWidth={1.5}
-							stroke="currentColor"
-							className="w-5 h-5 text-slate-400 dark:text-slate-500"
-						>
-							<path
-								strokeLinecap="round"
-								strokeLinejoin="round"
-								d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
-							/>
-						</svg>
+						<Search className="w-5 h-5 text-gray-400 dark:text-slate-500" />
 					</div>
 				</div>
 
@@ -104,27 +98,27 @@ const TableView = ({
 			</div>
 
 			{error ? (
-				<div className="rounded-md border border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/30 p-4 text-center text-red-600 dark:text-red-400">
-					<p className="font-medium">Terjadi Kesalahan</p>
-					<p className="text-sm">{error}</p>
+				<div className="rounded-lg border border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20 p-6 text-center">
+					<AlertTriangle className="mx-auto h-12 w-12 text-red-500 dark:text-red-400 mb-3" />
+					<p className="font-semibold text-lg text-red-700 dark:text-red-300">
+						Terjadi Kesalahan
+					</p>
+					<p className="text-sm text-red-600 dark:text-red-400 mt-1">{error}</p>
 				</div>
 			) : (
-				<Card className="w-full rounded-lg border border-slate-200 dark:border-slate-700 shadow-md overflow-hidden bg-transparent dark:bg-transparent p-0">
+				<Card className="w-full rounded-xl border border-gray-200 dark:border-slate-700 shadow-md overflow-hidden bg-white dark:bg-slate-800 p-0">
 					<div className="w-full overflow-x-auto">
-						{" "}
-						{/* This class handles horizontal scrolling and ensures it takes full parent width */}{" "}
-						{/* This class handles horizontal scrolling */}
 						<Table>
-							<TableHeader className="bg-slate-50 dark:bg-slate-800">
+							<TableHeader className="bg-gray-100 dark:bg-slate-700/50">
 								{table.getHeaderGroups().map((headerGroup) => (
 									<TableRow
 										key={headerGroup.id}
-										className="border-b border-slate-200 dark:border-slate-700"
+										className="border-b border-gray-200 dark:border-slate-700"
 									>
 										{headerGroup.headers.map((header) => (
 											<TableHead
 												key={header.id}
-												className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider"
+												className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap"
 											>
 												{!header.isPlaceholder &&
 													flexRender(
@@ -136,56 +130,36 @@ const TableView = ({
 									</TableRow>
 								))}
 							</TableHeader>
-							<TableBody className="bg-white dark:bg-slate-900 divide-y divide-slate-200 dark:divide-slate-700">
+							<TableBody className="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-slate-700">
 								{isLoading ? (
 									<TableRow>
 										<TableCell
 											colSpan={columns.length}
-											className="h-32 text-center text-slate-500 dark:text-slate-400"
+											className="h-48 text-center text-gray-500 dark:text-slate-400"
 										>
-											<div className="flex justify-center items-center space-x-2">
-												{/* You can use a spinner SVG or component here */}
-												<svg
-													className="animate-spin h-5 w-5 text-blue-600"
-													xmlns="http://www.w3.org/2000/svg"
-													fill="none"
-													viewBox="0 0 24 24"
-												>
-													<circle
-														className="opacity-25"
-														cx="12"
-														cy="12"
-														r="10"
-														stroke="currentColor"
-														strokeWidth="4"
-													></circle>
-													<path
-														className="opacity-75"
-														fill="currentColor"
-														d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-													></path>
-												</svg>
-												<span>Memuat data...</span>
+											<div className="flex flex-col justify-center items-center space-y-3">
+												<Loader2 className="h-10 w-10 animate-spin text-emerald-500" />
+												<span className="text-md font-medium">
+													Memuat data...
+												</span>
 											</div>
 										</TableCell>
 									</TableRow>
 								) : table.getRowModel().rows?.length ? (
-									table.getRowModel().rows.map((row, index) => (
+									table.getRowModel().rows.map((row) => (
 										<TableRow
 											key={row.id}
 											data-state={row.getIsSelected() && "selected"}
-											className={`hover:bg-slate-50 dark:hover:bg-slate-800/50 ${
-												row.getIsSelected()
-													? "bg-blue-50 dark:bg-blue-900/30"
-													: index % 2 === 0
-													? "bg-white dark:bg-slate-900"
-													: "bg-slate-50/50 dark:bg-slate-800/30"
-											}`}
+											className={cn(
+												"hover:bg-emerald-50/50 dark:hover:bg-slate-700/50 transition-colors duration-150",
+												row.getIsSelected() &&
+													"bg-emerald-50 dark:bg-emerald-700/20"
+											)}
 										>
 											{row.getVisibleCells().map((cell) => (
 												<TableCell
 													key={cell.id}
-													className="px-6 py-4 whitespace-nowrap text-sm text-slate-700 dark:text-slate-300"
+													className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-slate-300"
 												>
 													{flexRender(
 														cell.column.columnDef.cell,
@@ -199,9 +173,17 @@ const TableView = ({
 									<TableRow>
 										<TableCell
 											colSpan={columns.length}
-											className="h-32 text-center text-slate-500 dark:text-slate-400"
+											className="h-48 text-center text-gray-500 dark:text-slate-400"
 										>
-											Tidak ada data yang tersedia.
+											<div className="flex flex-col justify-center items-center space-y-3">
+												<Info className="h-12 w-12 text-gray-300 dark:text-slate-600" />
+												<span className="text-md font-medium">
+													Tidak ada data yang tersedia.
+												</span>
+												<span className="text-xs">
+													Coba ubah filter pencarian Anda.
+												</span>
+											</div>
 										</TableCell>
 									</TableRow>
 								)}
@@ -211,60 +193,61 @@ const TableView = ({
 				</Card>
 			)}
 
-			<div className="flex flex-col sm:flex-row items-center justify-between pt-4 gap-4">
-				<div className="text-sm text-slate-600 dark:text-slate-400">
-					{table.getFilteredSelectedRowModel().rows.length > 0
-						? `${table.getFilteredSelectedRowModel().rows.length} dari ${
-								table.getFilteredRowModel().rows.length
-						  } baris dipilih.`
-						: `Total ${table.getFilteredRowModel().rows.length} baris.`}
-					{table.getPageCount() > 0 &&
-						` Halaman ${
+			{table.getPageCount() > 1 && !error && (
+				<div className="flex flex-col sm:flex-row items-center justify-between pt-5 gap-4">
+					<div className="text-sm text-gray-600 dark:text-slate-400">
+						{table.getFilteredSelectedRowModel().rows.length > 0
+							? `${table.getFilteredSelectedRowModel().rows.length} dari ${
+									table.getFilteredRowModel().rows.length
+							  } baris dipilih.`
+							: `Total ${table.getFilteredRowModel().rows.length} baris.`}
+						{` Halaman ${
 							table.getState().pagination.pageIndex + 1
 						} dari ${table.getPageCount()}`}
+					</div>
+					<div className="flex items-center space-x-2">
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => table.setPageIndex(0)}
+							disabled={!table.getCanPreviousPage() || isLoading}
+							className="px-3 py-1.5 text-sm border-gray-300 dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-700 disabled:opacity-60 rounded-md"
+						>
+							{"<<"}
+						</Button>
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => table.previousPage()}
+							disabled={!table.getCanPreviousPage() || isLoading}
+							className="px-3 py-1.5 text-sm border-gray-300 dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-700 disabled:opacity-60 rounded-md"
+						>
+							Sebelumnya
+						</Button>
+						<span className="text-sm text-gray-700 dark:text-slate-300 px-2 py-1.5 border border-gray-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800">
+							{table.getState().pagination.pageIndex + 1}
+						</span>
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => table.nextPage()}
+							disabled={!table.getCanNextPage() || isLoading}
+							className="px-3 py-1.5 text-sm border-gray-300 dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-700 disabled:opacity-60 rounded-md"
+						>
+							Berikutnya
+						</Button>
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+							disabled={!table.getCanNextPage() || isLoading}
+							className="px-3 py-1.5 text-sm border-gray-300 dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-700 disabled:opacity-60 rounded-md"
+						>
+							{">>"}
+						</Button>
+					</div>
 				</div>
-				<div className="flex items-center space-x-2">
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={() => table.setPageIndex(0)}
-						disabled={!table.getCanPreviousPage() || isLoading}
-						className="px-3 py-1.5 text-sm border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-50"
-					>
-						{"<<"}
-					</Button>
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={() => table.previousPage()}
-						disabled={!table.getCanPreviousPage() || isLoading}
-						className="px-3 py-1.5 text-sm border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-50"
-					>
-						Sebelumnya
-					</Button>
-					<span className="text-sm text-slate-600 dark:text-slate-400">
-						{table.getState().pagination.pageIndex + 1}
-					</span>
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={() => table.nextPage()}
-						disabled={!table.getCanNextPage() || isLoading}
-						className="px-3 py-1.5 text-sm border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-50"
-					>
-						Berikutnya
-					</Button>
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-						disabled={!table.getCanNextPage() || isLoading}
-						className="px-3 py-1.5 text-sm border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-50"
-					>
-						{">>"}
-					</Button>
-				</div>
-			</div>
+			)}
 		</div>
 	);
 };

@@ -6,9 +6,15 @@ import { formatToIDR } from "@/lib/formatIdr";
 import UpdateKas from "./update-kas";
 import TambahKas from "./tambah-kas";
 import TableView from "@/components/data-table/table-view";
-import { Badge } from "@/components/ui/badge"; // Added for status badge consistency
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from "@/components/ui/tooltip"; // Pastikan path ini benar
 
 const TableKas = ({ onDataChanged }) => {
 	const [data, setData] = useState([]);
@@ -50,15 +56,29 @@ const TableKas = ({ onDataChanged }) => {
 			header: "Nama",
 			cell: ({ row }) => {
 				const dataNama = row.original?.akun?.nama;
-				return <div className="min-w-[200px]">{dataNama}</div>;
+				return <div className="">{dataNama}</div>;
 			},
 		},
 		{
 			accessorKey: "deskripsi",
 			header: "Deskripsi",
-			cell: ({ row }) => (
-				<div className="min-w-[200px]">{row.getValue("deskripsi")}</div>
-			),
+			cell: ({ row }) => {
+				const deskripsiLengkap = row.getValue("deskripsi");
+				return (
+					<TooltipProvider>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<div className="">
+									{deskripsiLengkap}
+								</div>
+							</TooltipTrigger>
+							<TooltipContent>
+								<p className="max-w-xs break-words">{deskripsiLengkap}</p>
+							</TooltipContent>
+						</Tooltip>
+					</TooltipProvider>
+				);
+			},
 		},
 		{
 			accessorKey: "jumlah",
@@ -68,7 +88,7 @@ const TableKas = ({ onDataChanged }) => {
 				const tipe = row.original.tipe;
 				return (
 					<div
-						className={`font-medium min-w-[120px] ${
+						className={`font-medium max-w-[120px] ${
 							tipe === "masuk"
 								? "text-emerald-600 dark:text-emerald-500"
 								: "text-red-600 dark:text-red-500"

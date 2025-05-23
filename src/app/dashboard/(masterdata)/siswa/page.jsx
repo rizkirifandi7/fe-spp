@@ -16,6 +16,8 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
+import Image from "next/image";
+import Link from "next/link";
 
 const PageSiswa = () => {
 	const router = useRouter();
@@ -24,6 +26,28 @@ const PageSiswa = () => {
 	const [error, setError] = useState(null);
 
 	const columns = [
+		{
+			accessorKey: "gambar",
+			header: "Foto",
+			cell: ({ row }) => {
+				const imageUrl = row.original?.akun_siswa?.gambar;
+				return (
+					<div className="overflow-x-auto">
+						{imageUrl ? (
+							<Image
+								width={40}
+								height={40}
+								src={imageUrl}
+								alt="Foto Siswa"
+								className="h-10 w-10 object-cover rounded" // Adjust styling as needed
+							/>
+						) : (
+							"Tidak ada foto"
+						)}
+					</div>
+				);
+			},
+		},
 		{
 			accessorKey: "nisn",
 			header: "NISN",
@@ -108,13 +132,7 @@ const PageSiswa = () => {
 				</div>
 			),
 		},
-		{
-			accessorKey: "gambar",
-			header: "Foto",
-			cell: ({ row }) => (
-				<div className=" overflow-x-auto">{row.getValue("gambar")}</div>
-			),
-		},
+
 		{
 			accessorKey: "status",
 			header: "Status",
@@ -195,7 +213,13 @@ const PageSiswa = () => {
 			data={data}
 			isLoading={isLoading}
 			error={error}
-			TambahComponent={<TambahSiswa onSuccess={fetchData} />}
+			TambahComponent={
+				<Link href="/dashboard/siswa/tambah-siswa">
+					<Button className="w-fit bg-emerald-600 text-white">
+						Tambah Siswa
+					</Button>
+				</Link>
+			}
 			title="Manajemen Siswa"
 			searchKey="nama"
 		/>

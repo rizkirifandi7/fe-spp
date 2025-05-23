@@ -21,9 +21,11 @@ export function LoginForm({ className, ...props }) {
 		if (state?.success) {
 			toast.success("Login successful!");
 			if (state.role === "admin") {
-				router.push("/dashboard/admin");
+				router.push("/dashboard/home");
+			} else if (state.role === "siswa") {
+				router.push("/dashboard-siswa/home");
 			} else {
-				router.push("/dashboard");
+				toast.error("Role tidak dikenali");
 			}
 		} else if (state?.error) {
 			toast.error(state.error);
@@ -35,7 +37,9 @@ export function LoginForm({ className, ...props }) {
 			<Card className="w-full max-w-md overflow-hidden rounded-2xl shadow-lg">
 				<div className="bg-gradient-to-r from-emerald-600 to-emerald-500 p-6 text-center text-white">
 					<h1 className="text-3xl font-bold">Selamat Datang</h1>
-					<p className="mt-2 opacity-90">Masukkan email dan password untuk login.</p>
+					<p className="mt-2 opacity-90">
+						Masukkan email dan password untuk login.
+					</p>
 				</div>
 
 				<div className="p-8">

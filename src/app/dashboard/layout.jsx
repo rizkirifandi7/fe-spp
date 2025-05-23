@@ -36,7 +36,7 @@ const DashboardLayout = ({ children }) => {
 			<AppSidebar />
 			<SidebarInset>
 				<HeaderSidebar />
-				<div className="p-4">{children}</div>
+				<div className="p-6 md:p-8">{children}</div>
 			</SidebarInset>
 		</SidebarProvider>
 	);

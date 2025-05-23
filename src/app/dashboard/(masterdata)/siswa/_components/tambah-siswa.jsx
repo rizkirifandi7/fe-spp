@@ -1,296 +1,382 @@
+"use client";
+
 import { z } from "zod";
-import GenericFormDialog from "@/components/input-form/text-input";
+import GenericFormDialog from "@/components/input-form/text-input"; // Pastikan path ini benar
 import { useKelas } from "@/hooks/useKelas";
 import { useJurusan } from "@/hooks/useJurusan";
 import { useUnits } from "@/hooks/useUnits";
+import {
+	User,
+	Briefcase,
+	GraduationCap,
+	Hash,
+	Mail,
+	KeyRound,
+	Phone,
+	Calendar,
+	MapPin,
+	Users2,
+	Home,
+	ShieldCheck,
+	Paperclip,
+	Image as ImageIcon,
+	Info,
+	UserSquare,
+	UserCog,
+} from "lucide-react";
 
+// Skema validasi Zod (tidak ada perubahan signifikan di sini, hanya memastikan konsistensi)
 const roleFormSchema = z.object({
 	id_kelas: z.string().min(1, "Kelas harus dipilih"),
 	id_jurusan: z.string().min(1, "Jurusan harus dipilih"),
 	id_unit: z.string().min(1, "Unit harus dipilih"),
 	role: z.string().min(1, "Role harus dipilih"),
 	nisn: z.string().min(1, "NISN harus diisi"),
-	nama: z.string().min(1, "Nama harus diisi"),
-	email: z.string().email("Email tidak valid"),
-	password: z.string().optional(),
+	nama: z.string().min(1, "Nama lengkap harus diisi"),
+	email: z.string().email("Format email tidak valid"),
+	password: z.string().min(6, "Password minimal 6 karakter"),
 	telepon: z
 		.string()
 		.min(10, "Nomor telepon minimal 10 digit")
 		.max(15, "Nomor telepon maksimal 15 digit")
-		.regex(/^\+?\d+$/, "Format nomor telepon tidak valid"),
+		.regex(
+			/^\+?\d+$/,
+			"Format nomor telepon tidak valid (hanya angka, boleh diawali '+')"
+		),
 	tgl_lahir: z
-		.date()
+		.date({
+			invalid_type_error: "Tanggal lahir harus berupa tanggal yang valid.",
+		})
 		.refine(
-			(date) => date instanceof Date && !isNaN(date.getTime()),
-			"Tanggal lahir tidak valid"
+			(date) => date < new Date(),
+			"Tanggal lahir tidak boleh di masa depan."
 		),
 	alamat: z.string().min(1, "Alamat harus diisi"),
 	status: z.enum(["on", "off"]),
-	gambar: z.string().optional(),
-	kebutuhan_khusus: z.enum(["Ada", "Tidak Ada"]),
-	disabilitas: z.enum(["Ada", "Tidak Ada"]),
-	nama_ayah: z.string().optional(),
-	nama_ibu: z.string().optional(),
+	gambar: z.any().optional(), // Dibuat opsional
+	kebutuhan_khusus: z.string().min(1, "Kebutuhan khusus harus diisi"),
+	disabilitas: z.string().min(1, "Disabilitas harus diisi"),
+	nama_ayah: z.string().min(1, "Nama ayah harus diisi"),
+	nama_ibu: z.string().min(1, "Nama ibu harus diisi"),
 	nama_wali: z.string().optional(),
 	no_kip: z.string().optional(),
-	tempat_lahir: z.string().optional(),
-	jenis_kelamin: z.enum(["Laki-Laki", "Perempuan"]),
-	tempat_lahir: z.string().optional(),
-	nik: z.string().optional(),
+	tempat_lahir: z.string().min(1, "Tempat lahir harus diisi"),
+	jenis_kelamin: z.enum(["Laki-Laki", "Perempuan"], {
+		errorMap: () => ({ message: "Jenis kelamin harus dipilih." }),
+	}),
+	nik: z.string().min(1, "NIK harus diisi"),
 });
 
 const TambahSiswa = ({ onSuccess }) => {
-	const { kelas, loading: loadingKelass, error: kelassError } = useKelas();
-	const {
-		jurusan,
-		loading: loadingJurusans,
-		error: jurusansError,
-	} = useJurusan();
-	const { units, loading: loadingUnits, error: unitsError } = useUnits();
+	const { kelas, loading: loadingKelass } = useKelas(); // Error state bisa ditambahkan jika ada
+	const { jurusan, loading: loadingJurusans } = useJurusan();
+	const { units, loading: loadingUnits } = useUnits();
 
 	const handleSubmit = async (values) => {
 		try {
+			// Error handling sudah ada di GenericFormDialog
+			const formData = new FormData();
+			Object.keys(values).forEach((key) => {
+				if (
+					key === "gambar" &&
+					values.gambar &&
+					values.gambar[0] instanceof File
+				) {
+					formData.append("gambar", values.gambar[0]);
+				} else if (values[key] instanceof Date) {
+					formData.append(key, values[key].toISOString().split("T")[0]);
+				} else if (
+					values[key] !== undefined &&
+					values[key] !== null &&
+					key !== "gambar"
+				) {
+					formData.append(key, values[key]);
+				}
+			});
+
 			const response = await fetch(
 				`${process.env.NEXT_PUBLIC_API_URL}/auth/register-siswa`,
 				{
 					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify(values),
+					body: formData,
 				}
 			);
 
-			if (!response.ok) throw new Error("Gagal menambahkan akun");
-			return response; // Return response untuk ditangani di GenericFormDialog
+			if (!response.ok) {
+				const errorData = await response.json();
+				throw new Error(
+					errorData.message ||
+						"Gagal menambahkan siswa. Periksa kembali data Anda."
+				);
+			}
+			return response;
 		} catch (error) {
-			throw error; // Lempar error untuk ditangani di GenericFormDialog
+			throw error;
 		}
 	};
 
+	// Definisi fields dengan ikon dan pengelompokan
+	const formFields = [
+		// Section: Informasi Pribadi Siswa
+		{
+			fieldType: "separator",
+			label: "Informasi Pribadi Siswa",
+			className: "md:col-span-2 mt-4",
+		},
+		{
+			name: "nama",
+			label: "Nama Lengkap",
+			placeholder: "Masukkan nama lengkap",
+			fieldType: "input",
+			icon: User,
+		},
+		{
+			name: "nisn",
+			label: "NISN",
+			placeholder: "Masukkan NISN",
+			fieldType: "input",
+			icon: Hash,
+		},
+		{
+			name: "nik",
+			label: "NIK",
+			placeholder: "Masukkan NIK",
+			fieldType: "input",
+			icon: Info,
+		},
+		{
+			name: "email",
+			label: "Email",
+			placeholder: "contoh@email.com",
+			fieldType: "input",
+			type: "email",
+			icon: Mail,
+		},
+		{
+			name: "password",
+			label: "Password Akun",
+			placeholder: "Minimal 6 karakter",
+			fieldType: "input",
+			type: "password",
+			icon: KeyRound,
+		},
+		{
+			name: "telepon",
+			label: "Nomor Telepon",
+			placeholder: "+628xxxxxxxxxx",
+			fieldType: "tel",
+			icon: Phone,
+		},
+		{
+			name: "tempat_lahir",
+			label: "Tempat Lahir",
+			placeholder: "Kota kelahiran",
+			fieldType: "input",
+			icon: MapPin,
+		},
+		{
+			name: "tgl_lahir",
+			label: "Tanggal Lahir",
+			fieldType: "date",
+			icon: Calendar,
+		},
+		{
+			name: "jenis_kelamin",
+			label: "Jenis Kelamin",
+			fieldType: "select",
+			options: [
+				{ value: "Laki-Laki", label: "Laki-Laki" },
+				{ value: "Perempuan", label: "Perempuan" },
+			],
+			icon: Users2,
+		},
+		{
+			name: "alamat",
+			label: "Alamat Lengkap",
+			placeholder: "Masukkan alamat lengkap siswa",
+			fieldType: "textarea",
+			className: "md:col-span-2",
+			icon: Home,
+		},
+
+		// Section: Informasi Akademik
+		{
+			fieldType: "separator",
+			label: "Informasi Akademik",
+			className: "md:col-span-2 mt-6",
+		},
+		{
+			name: "id_unit",
+			label: "Unit Sekolah",
+			placeholder: loadingUnits ? "Memuat unit..." : "Pilih unit",
+			fieldType: "select",
+			options: units.map((unit) => ({
+				value: unit.id.toString(),
+				label: unit.nama_unit,
+			})),
+			disabled: loadingUnits,
+			icon: GraduationCap,
+		},
+		{
+			name: "id_kelas",
+			label: "Kelas",
+			placeholder: loadingKelass ? "Memuat kelas..." : "Pilih kelas",
+			fieldType: "select",
+			options: kelas.map((k) => ({
+				value: k.id.toString(),
+				label: k.nama_kelas,
+			})),
+			disabled: loadingKelass,
+			icon: GraduationCap,
+		},
+		{
+			name: "id_jurusan",
+			label: "Jurusan",
+			placeholder: loadingJurusans ? "Memuat jurusan..." : "Pilih jurusan",
+			fieldType: "select",
+			options: jurusan.map((j) => ({
+				value: j.id.toString(),
+				label: j.nama_jurusan,
+			})),
+			disabled: loadingJurusans,
+			icon: Briefcase,
+		},
+		{
+			name: "role",
+			label: "Role Akun",
+			fieldType: "select",
+			options: [{ value: "siswa", label: "Siswa" }],
+			description: "Role untuk akun ini (otomatis Siswa).",
+			disabled: true,
+			icon: UserCog,
+		},
+		{
+			name: "status",
+			label: "Status Akun",
+			fieldType: "select",
+			options: [
+				{ value: "on", label: "Aktif" },
+				{ value: "off", label: "Non-Aktif" },
+			],
+			icon: ShieldCheck,
+		},
+
+		// Section: Informasi Tambahan
+		{
+			fieldType: "separator",
+			label: "Informasi Tambahan",
+			className: "md:col-span-2 mt-6",
+		},
+		{
+			name: "no_kip",
+			label: "No. KIP (Opsional)",
+			placeholder: "Masukkan No. KIP jika ada",
+			fieldType: "input",
+			icon: Paperclip,
+		},
+		{
+			name: "kebutuhan_khusus",
+			label: "Kebutuhan Khusus",
+			fieldType: "select",
+			options: [
+				{ value: "Tidak Ada", label: "Tidak Ada" },
+				{ value: "Ada", label: "Ada (Jelaskan)" },
+			],
+			icon: Info,
+		}, // Pertimbangkan textarea jika 'Ada'
+		{
+			name: "disabilitas",
+			label: "Disabilitas",
+			fieldType: "select",
+			options: [
+				{ value: "Tidak Ada", label: "Tidak Ada" },
+				{ value: "Ada", label: "Ada (Jelaskan)" },
+			],
+			icon: Info,
+		}, // Pertimbangkan textarea jika 'Ada'
+
+		// Section: Data Orang Tua / Wali
+		{
+			fieldType: "separator",
+			label: "Data Orang Tua / Wali",
+			className: "md:col-span-2 mt-6",
+		},
+		{
+			name: "nama_ayah",
+			label: "Nama Ayah",
+			placeholder: "Nama lengkap ayah",
+			fieldType: "input",
+			icon: UserSquare,
+		},
+		{
+			name: "nama_ibu",
+			label: "Nama Ibu",
+			placeholder: "Nama lengkap ibu",
+			fieldType: "input",
+			icon: UserSquare,
+		},
+		{
+			name: "nama_wali",
+			label: "Nama Wali (Opsional)",
+			placeholder: "Nama lengkap wali jika ada",
+			fieldType: "input",
+			icon: UserSquare,
+		},
+
+		// Section: Unggah Foto
+		{
+			fieldType: "separator",
+			label: "Foto Profil",
+			className: "md:col-span-2 mt-6",
+		},
+		{
+			name: "gambar",
+			label: "Gambar Profil (Opsional)",
+			fieldType: "file",
+			description: "Format: JPG, PNG. Maks: 2MB.",
+			icon: ImageIcon,
+			className: "md:col-span-2",
+		},
+	];
+
 	return (
 		<GenericFormDialog
-			layoutType="grid"
-			dialogClassName="max-h-[80dvh] overflow-y-auto sm:max-w-[800px]"
-			formClassName="grid grid-cols-1 md:grid-cols-2 gap-4"
-			triggerVariant="add"
-			triggerText="Tambah Siswa"
-			dialogTitle="Tambah Siswa"
-			dialogDescription="Tambahkan siswa baru."
+			layoutType="grid" // Tetap grid untuk banyak field
+			dialogClassName="max-h-[90dvh] sm:max-w-3xl md:max-w-4xl" // Dibuat lebih lebar untuk 2 kolom
+			formClassName="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5 p-1" // Padding form diatur di sini
+			triggerVariant="add" // Ini akan menghasilkan tombol hijau emerald
+			triggerText="Tambah Data Siswa Baru"
+			dialogTitle="Registrasi Siswa Baru"
+			dialogDescription="Lengkapi formulir di bawah ini untuk menambahkan siswa baru ke sistem."
 			formSchema={roleFormSchema}
 			defaultValues={{
 				nisn: "",
 				id_kelas: "",
 				id_jurusan: "",
 				id_unit: "",
-				role: "",
+				role: "siswa",
 				nama: "",
 				email: "",
 				password: "",
 				telepon: "",
-				tgl_lahir: "",
+				tgl_lahir: undefined,
 				alamat: "",
 				status: "on",
-				gambar: "",
-				kebutuhan_khusus: "",
-				disabilitas: "",
+				gambar: undefined,
+				kebutuhan_khusus: "Tidak Ada",
+				disabilitas: "Tidak Ada",
 				nama_ayah: "",
 				nama_ibu: "",
 				nama_wali: "",
 				no_kip: "",
 				tempat_lahir: "",
-				jenis_kelamin: "",
+				jenis_kelamin: undefined,
 				nik: "",
 			}}
-			fields={[
-				{
-					name: "nisn",
-					label: "NISN",
-					placeholder: "Masukkan nisn...",
-					fieldType: "input",
-				},
-				{
-					name: "nik",
-					label: "NIK",
-					placeholder: "Masukkan nik...",
-					fieldType: "input",
-				},
-				{
-					name: "nama",
-					label: "Nama",
-					placeholder: "Masukkan nama...",
-					fieldType: "input",
-				},
-				{
-					name: "email",
-					label: "Email",
-					placeholder: "Masukkan email...",
-					fieldType: "input",
-				},
-				{
-					name: "password",
-					label: "Password",
-					placeholder: "Masukkan password...",
-					fieldType: "input",
-				},
-				{
-					name: "telepon",
-					label: "Telepon",
-					placeholder: "Masukkan telepon...",
-					fieldType: "tel",
-				},
-				{
-					name: "tgl_lahir",
-					label: "Tanggal lahir",
-					placeholder: "Masukkan tgl_lahir...",
-					fieldType: "date",
-				},
-				{
-					name: "tempat_lahir",
-					label: "Tempat Lahir",
-					placeholder: "Masukkan tempat lahir...",
-					fieldType: "input",
-				},
-				{
-					name: "jenis_kelamin",
-					label: "Jenis Kelamin",
-					placeholder: "Pilih jenis kelamin...",
-					fieldType: "select",
-					options: [
-						{ value: "Laki-Laki", label: "Laki-laki" },
-						{ value: "Perempuan", label: "Perempuan" },
-					],
-				},
-				{
-					name: "alamat",
-					label: "Alamat",
-					placeholder: "Masukkan alamat...",
-					fieldType: "textarea",
-				},
-				{
-					name: "no_kip",
-					label: "No KIP",
-					placeholder: "Masukkan no kip...",
-					fieldType: "input",
-				},
-				{
-					name: "role",
-					label: "Role",
-					placeholder: "Pilih role...",
-					fieldType: "select",
-					options: [
-						{ value: "admin", label: "Admin" },
-						{ value: "siswa", label: "Siswa" },
-						{ value: "guru", label: "guru" },
-					],
-					description: "Pilih role akun",
-				},
-				{
-					name: "id_unit",
-					label: "Unit",
-					placeholder: loadingUnits ? "Memuat data unit..." : "Pilih unit...",
-					fieldType: "select",
-					options: units.map((unit) => ({
-						value: unit.id,
-						label: unit.nama_unit,
-					})),
-					disabled: loadingUnits,
-					description: loadingUnits
-						? "Sedang memuat data unit..."
-						: "Pilih unit untuk kelas ini",
-				},
-				{
-					name: "id_kelas",
-					label: "Kelas",
-					placeholder: loadingKelass
-						? "Memuat data kelas..."
-						: "Pilih kelas...",
-					fieldType: "select",
-					options: kelas.map((kelas) => ({
-						value: kelas.id,
-						label: kelas.nama_kelas,
-					})),
-					disabled: loadingKelass,
-					description: loadingKelass
-						? "Sedang memuat data kelas..."
-						: "Pilih kelas untuk akun ini",
-				},
-				{
-					name: "id_jurusan",
-					label: "Jurusan",
-					placeholder: loadingJurusans
-						? "Memuat data jurusan..."
-						: "Pilih jurusan...",
-					fieldType: "select",
-					options: jurusan.map((jurusan) => ({
-						value: jurusan.id,
-						label: jurusan.nama_jurusan,
-					})),
-					disabled: loadingJurusans,
-					description: loadingJurusans
-						? "Sedang memuat data jurusan..."
-						: "Pilih jurusan untuk akun ini",
-				},
-				{
-					name: "kebutuhan_khusus",
-					label: "Kebutuhan Khusus",
-					placeholder: "Pilih kebutuhan khusus...",
-					fieldType: "select",
-					options: [
-						{ value: "Ada", label: "Ada" },
-						{ value: "Tidak Ada", label: "Tidak Ada" },
-					],
-					description: "Pilih kebutuhan_khusus akun",
-				},
-				{
-					name: "disabilitas",
-					label: "Disabilitas",
-					placeholder: "Pilih disabilitas...",
-					fieldType: "select",
-					options: [
-						{ value: "Ada", label: "Ada" },
-						{ value: "Tidak Ada", label: "Tidak Ada" },
-					],
-				},
-				{
-					name: "status",
-					label: "Status",
-					placeholder: "Pilih status...",
-					fieldType: "select",
-					options: [
-						{ value: "on", label: "Aktif" },
-						{ value: "off", label: "Non-Aktif" },
-					],
-					description: "Pilih status akun",
-				},
-				{
-					name: "nama_ayah",
-					label: "Nama Ayah",
-					placeholder: "Masukkan nama ayah...",
-					fieldType: "input",
-				},
-				{
-					name: "nama_ibu",
-					label: "Nama Ibu",
-					placeholder: "Masukkan nama ibu...",
-					fieldType: "input",
-				},
-				{
-					name: "nama_wali",
-					label: "Nama Wali",
-					placeholder: "Masukkan nama wali...",
-					fieldType: "input",
-				},
-				{
-					name: "gambar",
-					label: "Gambar",
-					placeholder: "Masukkan gambar...",
-					fieldType: "file",
-					description: "Unggah gambar profil siswa",
-				},
-			]}
+			fields={formFields}
 			onSubmit={handleSubmit}
 			onSuccess={onSuccess}
+			submitButtonText="Simpan Data Siswa" // Teks tombol submit kustom
 		/>
 	);
 };

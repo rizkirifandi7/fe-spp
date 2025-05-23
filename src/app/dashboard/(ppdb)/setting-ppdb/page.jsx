@@ -112,7 +112,7 @@ const PageSettingPPDB = () => {
 	}, [fetchData]);
 
 	return (
-		<div className="p-6 md:p-8">
+		<div className="">
 			<TableView
 				columns={columns}
 				data={data}

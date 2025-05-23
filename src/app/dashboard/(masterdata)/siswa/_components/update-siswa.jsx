@@ -12,7 +12,7 @@ const roleFormSchema = z.object({
 	nisn: z.string().min(1, "NISN harus diisi"),
 	nama: z.string().min(1, "Nama harus diisi"),
 	email: z.string().email("Email tidak valid"),
-	password: z.string().optional(),
+	password: z.string().optional(), // Keep optional
 	telepon: z
 		.string()
 		.min(10, "Nomor telepon minimal 10 digit")
@@ -26,7 +26,16 @@ const roleFormSchema = z.object({
 		),
 	alamat: z.string().min(1, "Alamat harus diisi"),
 	status: z.enum(["on", "off"]),
-	gambar: z.string().optional(),
+	gambar: z.any(), // Updated for FileList, optional
+	nik: z.string().optional(),
+	tempat_lahir: z.string().optional(),
+	jenis_kelamin: z.string().optional(),
+	kebutuhan_khusus: z.string().optional(),
+	disabilitas: z.string().optional(),
+	no_kip: z.string().optional(),
+	nama_ayah: z.string().optional(),
+	nama_ibu: z.string().optional(),
+	nama_wali: z.string().optional(),
 });
 
 const UpdateSiswa = ({ onSuccess, id, rowData }) => {
@@ -40,21 +49,44 @@ const UpdateSiswa = ({ onSuccess, id, rowData }) => {
 
 	const handleSubmit = async (values) => {
 		try {
+			const formData = new FormData();
+
+			// Append all fields to FormData
+			Object.keys(values).forEach((key) => {
+				if (key === "gambar") {
+					// Handle file separately
+					return;
+				}
+				if (
+					key === "password" &&
+					(!values.password || values.password.trim() === "")
+				) {
+					// Don't append password if it's empty or just whitespace
+					return;
+				}
+				if (values[key] instanceof Date) {
+					formData.append(key, values[key].toISOString()); // Send date as ISO string
+				} else if (values[key] !== undefined && values[key] !== null) {
+					formData.append(key, values[key]);
+				}
+			});
+
 			const response = await fetch(
 				`${process.env.NEXT_PUBLIC_API_URL}/akun/siswa/${id}`,
 				{
 					method: "PUT",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify(values),
+					// DO NOT set Content-Type header, the browser will do it for FormData
+					body: formData,
 				}
 			);
 
-			if (!response.ok) throw new Error("Gagal menambahkan akun");
-			return response; // Return response untuk ditangani di GenericFormDialog
+			if (!response.ok) {
+				const errorData = await response.json();
+				throw new Error(errorData.message || "Gagal memperbarui data siswa");
+			}
+			return response; // Return response for GenericFormDialog
 		} catch (error) {
-			throw error; // Lempar error untuk ditangani di GenericFormDialog
+			throw error; // Re-throw error for GenericFormDialog
 		}
 	};
 
@@ -64,34 +96,46 @@ const UpdateSiswa = ({ onSuccess, id, rowData }) => {
 			dialogClassName="max-h-[80dvh] overflow-y-auto sm:max-w-[800px]"
 			formClassName="grid grid-cols-1 md:grid-cols-2 gap-4"
 			triggerVariant="edit"
-			dialogTitle="Tambah Siswa"
-			dialogDescription="Tambahkan siswa baru."
+			dialogTitle="Update Data Siswa"
+			dialogDescription="Perbarui data siswa."
 			formSchema={roleFormSchema}
 			defaultValues={{
 				nisn: rowData.akun_siswa?.nisn || "",
-				id_kelas: rowData.akun_siswa?.kelas?.id.toString() || "",
-				id_jurusan: rowData.akun_siswa?.jurusan?.id.toString() || "",
-				id_unit: rowData.akun_siswa?.unit?.id.toString() || "",
-				role: rowData.role?.toString() || "",
+				id_kelas: rowData.akun_siswa?.kelas?.id?.toString() || "",
+				id_jurusan: rowData.akun_siswa?.jurusan?.id?.toString() || "",
+				id_unit: rowData.akun_siswa?.unit?.id?.toString() || "",
+				role: rowData.role?.toString() || "siswa",
 				nama: rowData.nama || "",
 				email: rowData.email || "",
-				password: "",
+				password: "", // Default to empty, user can fill to change
 				telepon: rowData.telepon || "",
-				tgl_lahir: rowData.tgl_lahir ? new Date(rowData.tgl_lahir) : "",
+				tgl_lahir: rowData.akun_siswa?.tgl_lahir
+					? new Date(rowData.akun_siswa.tgl_lahir)
+					: undefined,
 				alamat: rowData.alamat || "",
 				status: rowData.status || "on",
-				gambar: "",
+				nik: rowData.akun_siswa?.nik || "",
+				tempat_lahir: rowData.akun_siswa?.tempat_lahir || "",
+				jenis_kelamin: rowData.akun_siswa?.jenis_kelamin || "",
+				kebutuhan_khusus: rowData.akun_siswa?.kebutuhan_khusus || "",
+				disabilitas: rowData.akun_siswa?.disabilitas || "",
+				no_kip: rowData.akun_siswa?.no_kip || "",
+				nama_ayah: rowData.akun_siswa?.nama_ayah || "",
+				nama_ibu: rowData.akun_siswa?.nama_ibu || "",
+				nama_wali: rowData.akun_siswa?.nama_wali || "",
+				gambar: undefined, // Default for file input
+				hapus_gambar: false, // Default for checkbox
 			}}
 			fields={[
 				{
 					name: "nisn",
-					label: "Nisn",
-					placeholder: "Masukkan nisn...",
+					label: "NISN",
+					placeholder: "Masukkan NISN...",
 					fieldType: "input",
 				},
 				{
 					name: "nama",
-					label: "Nama",
+					label: "Nama Lengkap",
 					placeholder: "Masukkan nama...",
 					fieldType: "input",
 				},
@@ -103,9 +147,10 @@ const UpdateSiswa = ({ onSuccess, id, rowData }) => {
 				},
 				{
 					name: "password",
-					label: "Password",
-					placeholder: "Masukkan password...",
+					label: "Password (Opsional)",
+					placeholder: "Kosongkan jika tidak ingin diubah",
 					fieldType: "input",
+					type: "password",
 				},
 				{
 					name: "telepon",
@@ -113,12 +158,7 @@ const UpdateSiswa = ({ onSuccess, id, rowData }) => {
 					placeholder: "Masukkan telepon...",
 					fieldType: "tel",
 				},
-				{
-					name: "tgl_lahir",
-					label: "Tanggal lahir",
-					placeholder: "Masukkan tgl_lahir...",
-					fieldType: "date",
-				},
+				{ name: "tgl_lahir", label: "Tanggal Lahir", fieldType: "date" },
 				{
 					name: "alamat",
 					label: "Alamat",
@@ -126,80 +166,115 @@ const UpdateSiswa = ({ onSuccess, id, rowData }) => {
 					fieldType: "textarea",
 				},
 				{
-					name: "role",
-					label: "Role",
-					placeholder: "Pilih role...",
+					name: "tempat_lahir",
+					label: "Tempat Lahir",
+					placeholder: "Masukkan tempat lahir...",
+					fieldType: "input",
+				},
+				{
+					name: "nik",
+					label: "NIK",
+					placeholder: "Masukkan NIK...",
+					fieldType: "input",
+				},
+				{
+					name: "jenis_kelamin",
+					label: "Jenis Kelamin",
 					fieldType: "select",
 					options: [
-						{ value: "admin", label: "Admin" },
-						{ value: "siswa", label: "Siswa" },
-						{ value: "guru", label: "guru" },
+						{ value: "Laki-Laki", label: "Laki-Laki" },
+						{ value: "Perempuan", label: "Perempuan" },
 					],
-					description: "Pilih role akun",
+				},
+				{
+					name: "role",
+					label: "Role",
+					fieldType: "select",
+					options: [{ value: "siswa", label: "Siswa" } /* other roles */],
 				},
 				{
 					name: "id_unit",
 					label: "Unit",
-					placeholder: loadingUnits ? "Memuat data unit..." : "Pilih unit...",
+					placeholder: loadingUnits ? "Memuat..." : "Pilih unit...",
 					fieldType: "select",
 					options: units.map((unit) => ({
-						value: unit.id,
+						value: unit.id.toString(),
 						label: unit.nama_unit,
 					})),
 					disabled: loadingUnits,
-					description: loadingUnits
-						? "Sedang memuat data unit..."
-						: "Pilih unit untuk kelas ini",
 				},
 				{
 					name: "id_kelas",
 					label: "Kelas",
-					placeholder: loadingKelass
-						? "Memuat data kelas..."
-						: "Pilih kelas...",
+					placeholder: loadingKelass ? "Memuat..." : "Pilih kelas...",
 					fieldType: "select",
-					options: kelas.map((kelas) => ({
-						value: kelas.id,
-						label: kelas.nama_kelas,
+					options: kelas.map((k) => ({
+						value: k.id.toString(),
+						label: k.nama_kelas,
 					})),
 					disabled: loadingKelass,
-					description: loadingKelass
-						? "Sedang memuat data kelas..."
-						: "Pilih kelas untuk akun ini",
 				},
 				{
 					name: "id_jurusan",
 					label: "Jurusan",
-					placeholder: loadingJurusans
-						? "Memuat data jurusan..."
-						: "Pilih jurusan...",
+					placeholder: loadingJurusans ? "Memuat..." : "Pilih jurusan...",
 					fieldType: "select",
-					options: jurusan.map((jurusan) => ({
-						value: jurusan.id,
-						label: jurusan.nama_jurusan,
+					options: jurusan.map((j) => ({
+						value: j.id.toString(),
+						label: j.nama_jurusan,
 					})),
 					disabled: loadingJurusans,
-					description: loadingJurusans
-						? "Sedang memuat data jurusan..."
-						: "Pilih jurusan untuk akun ini",
 				},
 				{
 					name: "status",
-					label: "Status",
-					placeholder: "Pilih status...",
+					label: "Status Akun",
 					fieldType: "select",
 					options: [
 						{ value: "on", label: "Aktif" },
 						{ value: "off", label: "Non-Aktif" },
 					],
-					description: "Pilih status akun",
+				},
+				{
+					name: "kebutuhan_khusus",
+					label: "Kebutuhan Khusus",
+					placeholder: "Mis: Tidak Ada",
+					fieldType: "input",
+				},
+				{
+					name: "disabilitas",
+					label: "Disabilitas",
+					placeholder: "Mis: Tidak Ada",
+					fieldType: "input",
+				},
+				{
+					name: "no_kip",
+					label: "No. KIP (Jika Ada)",
+					placeholder: "Masukkan No. KIP...",
+					fieldType: "input",
+				},
+				{
+					name: "nama_ayah",
+					label: "Nama Ayah",
+					placeholder: "Masukkan nama ayah...",
+					fieldType: "input",
+				},
+				{
+					name: "nama_ibu",
+					label: "Nama Ibu",
+					placeholder: "Masukkan nama ibu...",
+					fieldType: "input",
+				},
+				{
+					name: "nama_wali",
+					label: "Nama Wali (Jika Ada)",
+					placeholder: "Masukkan nama wali...",
+					fieldType: "input",
 				},
 				{
 					name: "gambar",
-					label: "Gambar",
-					placeholder: "Masukkan gambar...",
+					label: "Ganti Gambar Profil",
 					fieldType: "file",
-					description: "Unggah gambar profil siswa",
+					description: "Unggah gambar baru jika ingin mengganti.",
 				},
 			]}
 			onSubmit={handleSubmit}
@@ -209,3 +284,4 @@ const UpdateSiswa = ({ onSuccess, id, rowData }) => {
 };
 
 export default UpdateSiswa;
+// ...existing code...

@@ -11,7 +11,7 @@ const PageKas = () => {
 	};
 
 	return (
-		<div className="p-4 md:p-8 space-y-6">
+		<div className="space-y-6">
 			<CardInfoKas refreshKey={refreshKey} />
 			<TableKas onDataChanged={handleDataChange} />
 		</div>
