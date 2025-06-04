@@ -213,7 +213,7 @@ const GenericFormDialog = ({
 				icon = icon || <Pencil className="h-4 w-4" />;
 				variant = "outline";
 				buttonClassName =
-					"dark:border-emerald-600 dark:text-emerald-400 dark:hover:bg-slate-700 dark:hover:text-emerald-300 shadow-sm";
+					"dark:border-emerald-600 dark:text-emerald-400 dark:hover:bg-slate-700 dark:hover:text-emerald-300";
 				buttonSize = triggerText ? "default" : "icon"; // Jadi icon jika tidak ada teks
 				tooltipInfo = triggerText ? "" : "Edit";
 				break;

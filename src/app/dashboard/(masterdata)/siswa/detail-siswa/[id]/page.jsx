@@ -220,7 +220,7 @@ const DetailSiswaPage = () => {
 									src={
 										gambar ||
 										`https://avatar.vercel.sh/${nama || "siswa"}.png?size=160`
-									}
+									}	
 									alt={nama || "Foto Siswa"}
 									className="object-cover"
 								/>

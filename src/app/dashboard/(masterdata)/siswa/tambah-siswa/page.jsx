@@ -63,7 +63,7 @@ import {
 } from "lucide-react";
 import Link from "next/link"; // Untuk tombol kembali
 import { cn } from "@/lib/utils";
-import { AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 // Skema validasi Zod (sama seperti sebelumnya)
 const roleFormSchema = z.object({
@@ -93,13 +93,13 @@ const roleFormSchema = z.object({
 		),
 	alamat: z.string().min(1, "Alamat harus diisi"),
 	status: z.enum(["on", "off"]),
-	gambar: z.any().optional(),
+	gambar: z.any(),
 	kebutuhan_khusus: z.string().min(1, "Kebutuhan khusus harus diisi"),
 	disabilitas: z.string().min(1, "Disabilitas harus diisi"),
 	nama_ayah: z.string().min(1, "Nama ayah harus diisi"),
 	nama_ibu: z.string().min(1, "Nama ibu harus diisi"),
-	nama_wali: z.string().optional(),
-	no_kip: z.string().optional(),
+	no_kip: z.union([z.string(), z.undefined()]).optional(), // Opsional dan bisa string atau undefined
+	nama_wali: z.union([z.string(), z.undefined()]).optional(), // Mengatur no_kip sebagai opsional
 	tempat_lahir: z.string().min(1, "Tempat lahir harus diisi"),
 	jenis_kelamin: z.enum(["Laki-Laki", "Perempuan"], {
 		errorMap: () => ({ message: "Jenis kelamin harus dipilih." }),
@@ -258,7 +258,7 @@ const PageTambahSiswa = () => {
 			email: "",
 			password: "",
 			telepon: "",
-			tgl_lahir: undefined,
+			tgl_lahir: "",
 			alamat: "",
 			status: "on",
 			gambar: undefined,
@@ -279,20 +279,26 @@ const PageTambahSiswa = () => {
 		setSubmitError(null);
 		try {
 			const formData = new FormData();
+
+			// Hanya append field yang memiliki nilai
 			Object.keys(values).forEach((key) => {
-				if (
-					key === "gambar" &&
-					values.gambar &&
-					values.gambar[0] instanceof File
-				) {
-					formData.append("gambar", values.gambar[0]);
-				} else if (values[key] instanceof Date) {
+				// Skip field yang undefined, null, atau empty string (kecuali untuk field tertentu)
+				if (values[key] === undefined || values[key] === null) return;
+
+				// Handle file upload
+				if (key === "gambar" && values.gambar instanceof File) {
+					formData.append("gambar", values.gambar);
+				}
+				// Handle date
+				else if (values[key] instanceof Date) {
 					formData.append(key, values[key].toISOString().split("T")[0]);
-				} else if (
-					values[key] !== undefined &&
-					values[key] !== null &&
-					key !== "gambar"
-				) {
+				}
+				// Handle empty string for optional fields
+				else if (values[key] === "" && ["no_kip", "nama_wali"].includes(key)) {
+					// Skip appending empty optional fields
+				}
+				// Handle other fields
+				else {
 					formData.append(key, values[key]);
 				}
 			});
@@ -312,8 +318,6 @@ const PageTambahSiswa = () => {
 
 			toast.success("Siswa berhasil ditambahkan!");
 			form.reset();
-			// Redirect atau aksi lain setelah sukses, misalnya:
-			// router.push('/admin/data-siswa');
 		} catch (error) {
 			console.error("Error submitting form:", error);
 			setSubmitError(error.message || "Terjadi kesalahan. Silakan coba lagi.");
@@ -357,7 +361,7 @@ const PageTambahSiswa = () => {
 		{
 			name: "telepon",
 			label: "Nomor Telepon",
-			placeholder: "+628xxxxxxxxxx",
+			placeholder: "628xxxxxxxxxx",
 			fieldType: "tel",
 			icon: Phone,
 		},

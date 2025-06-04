@@ -208,21 +208,23 @@ const PageSiswa = () => {
 	}, [fetchData]);
 
 	return (
-		<TableView
-			columns={columns}
-			data={data}
-			isLoading={isLoading}
-			error={error}
-			TambahComponent={
-				<Link href="/dashboard/siswa/tambah-siswa">
-					<Button className="w-fit bg-emerald-600 text-white">
-						Tambah Siswa
-					</Button>
-				</Link>
-			}
-			title="Manajemen Siswa"
-			searchKey="nama"
-		/>
+		<div className="w-full max-w-[1560px] mx-auto overflow-x-auto">
+			<TableView
+				columns={columns}
+				data={data}
+				isLoading={isLoading}
+				error={error}
+				TambahComponent={
+					<Link href="/dashboard/siswa/tambah-siswa">
+						<Button className="w-fit bg-emerald-600 text-white">
+							Tambah Siswa
+						</Button>
+					</Link>
+				}
+				title="Manajemen Siswa"
+				searchKey="nama"
+			/>
+		</div>
 	);
 };
 
