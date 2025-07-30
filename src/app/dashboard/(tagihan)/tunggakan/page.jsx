@@ -42,7 +42,7 @@ export default function TagihanSiswaPage() {
 		jurusan: "",
 		status: "",
 	});
-	const [showFilters, setShowFilters] = useState(false);
+	const [showFilters, setShowFilters] = useState(true);
 	const [currentPage, setCurrentPage] = useState(1);
 	const itemsPerPage = 10;
 
@@ -191,13 +191,6 @@ export default function TagihanSiswaPage() {
 							Lihat dan kelola tagihan serta tunggakan siswa
 						</p>
 					</div>
-					<Button
-						onClick={() => router.push("/dashboard/buat-tagihan")}
-						className="bg-emerald-600 hover:bg-green-700 dark:bg-emerald-600 dark:hover:bg-green-700 text-white"
-					>
-						<Plus className="h-4 w-4 mr-1" />
-						Buat Tagihan Baru
-					</Button>
 				</div>
 
 				{/* Filter Section */}

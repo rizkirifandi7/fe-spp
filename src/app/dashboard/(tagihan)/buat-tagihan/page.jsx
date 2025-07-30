@@ -1,100 +1,27 @@
-"use client";
+import React, { Suspense } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+import CreateTagihanPage from "./_components/buat-tagihan-baru";
 
-import { useEffect, useCallback, useState } from "react";
-import axios from "axios";
-import { useRouter } from "next/navigation";
-import { Plus } from "lucide-react";
-import TableView from "@/components/data-table/table-view";
-import { Button } from "@/components/ui/button";
-
-import TambahTipePembayaran from "./_components/tambah-jenis-pembayaran";
-import UpdateTipePembayaran from "./_components/update-jenis-pembayaran";
-import HapusTipePembayaran from "./_components/hapus-jenis-pembayaran";
-
-const PageTipePembayaran = () => {
-	const router = useRouter();
-	const [data, setData] = useState([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState(null);
-
-	const columns = [
-		{
-			accessorKey: "nama",
-			header: "Jenis Pembayaran",
-			cell: ({ row }) => (
-				<div className="w-[200px] overflow-x-auto">{row.getValue("nama")}</div>
-			),
-		},
-		{
-			accessorKey: "deskripsi",
-			header: "Deskripsi",
-			cell: ({ row }) => (
-				<div className="w-[200px] overflow-x-auto">
-					{row.getValue("deskripsi")}
-				</div>
-			),
-		},
-		{
-			id: "actions",
-			enableHiding: false,
-			cell: ({ row }) => {
-				const { id } = row.original;
-				const rowData = row.original;
-				return (
-					<div className="flex items-center gap-2">
-						<Button
-							variant="outline"
-							size="icon"
-							onClick={() =>
-								router.push(`/dashboard/buat-tagihan/create?jenis=${id}`)
-							}
-							className="flex items-center gap-1 cursor-pointer"
-						>
-							<Plus className="h-4 w-4" />
-						</Button>
-						<UpdateTipePembayaran
-							onSuccess={fetchData}
-							id={id}
-							rowData={rowData}
-						/>
-						<HapusTipePembayaran id={id} onSuccess={fetchData} />
-					</div>
-				);
-			},
-		},
-	];
-
-	const fetchData = useCallback(async () => {
-		try {
-			setIsLoading(true);
-			setError(null);
-			const response = await axios.get(
-				`${process.env.NEXT_PUBLIC_API_URL}/jenis-pembayaran`
-			);
-			setData(response.data.data);
-		} catch (err) {
-			console.error("Error fetching data:", err);
-			setError("Gagal memuat data");
-		} finally {
-			setIsLoading(false);
-		}
-	}, []);
-
-	useEffect(() => {
-		fetchData();
-	}, [fetchData]);
-
+function LoadingFallback() {
 	return (
-		<TableView
-			columns={columns}
-			data={data}
-			isLoading={isLoading}
-			error={error}
-			TambahComponent={<TambahTipePembayaran onSuccess={fetchData} />}
-			title="Manajemen Buat Tagihan"
-			searchKey="nama"
-		/>
+		<div className="container mx-auto py-12 px-4 md:px-6 space-y-6">
+			<Skeleton className="h-10 w-3/4 md:w-1/2" />
+			<div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+				<Skeleton className="h-12 w-full rounded-lg" />
+				<Skeleton className="h-12 w-full rounded-lg" />
+			</div>
+			<Skeleton className="h-12 w-1/3 md:w-1/4 rounded-lg" />
+			<Skeleton className="h-72 w-full rounded-xl" />
+		</div>
+	);
+}
+
+const PageCreateTagihan = () => {
+	return (
+		<Suspense fallback={<LoadingFallback />}>
+			<CreateTagihanPage />
+		</Suspense>
 	);
 };
 
-export default PageTipePembayaran;
+export default PageCreateTagihan;

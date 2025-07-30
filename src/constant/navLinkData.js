@@ -88,12 +88,16 @@ export const dataNavLink = {
 			icon: Banknote,
 			items: [
 				{
-					title: "Tunggakan",
+					title: "Informasi Tagihan",
 					url: "/dashboard/tunggakan",
 				},
 				{
 					title: "Buat Tagihan",
 					url: "/dashboard/buat-tagihan",
+				},
+				{
+					title: "Jenis Tagihan",
+					url: "/dashboard/jenis-tagihan",
 				},
 			],
 		},
