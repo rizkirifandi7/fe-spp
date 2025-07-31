@@ -179,6 +179,24 @@ const GenericFormDialog = ({
 						className={commonInputClass}
 					/>
 				);
+			case "number-idr":
+				return (
+					<NumberInputWithFormat
+						value={renderFieldProps.value}
+						onChange={renderFieldProps.onChange}
+						placeholder={field.placeholder || "Masukkan jumlah uang..."}
+						className={commonInputClass}
+					/>
+				);
+			case "number":
+				return (
+					<Input
+						type="number"
+						placeholder={field.placeholder || "Masukkan angka..."}
+						{...renderFieldProps}
+						className={commonInputClass}
+					/>
+				);
 			// Tambahkan case lain jika ada (checkbox, radio, number, dll.)
 			default:
 				return (
@@ -259,7 +277,7 @@ const GenericFormDialog = ({
 			<DialogTrigger asChild>{renderTriggerButton()}</DialogTrigger>
 			<DialogContent
 				className={cn(
-					"bg-white dark:bg-slate-800 border dark:border-slate-700 shadow-2xl rounded-xl p-0 max-h-[95vh] flex flex-col",
+					"bg-white dark:bg-slate-800 border dark:border-slate-700 shadow-2xl rounded-xl p-0 max-h-[100vh] flex flex-col",
 					dialogClassName
 				)}
 			>
@@ -340,32 +358,32 @@ const GenericFormDialog = ({
 									/>
 								);
 							})}
-							<DialogFooter className="md:col-span-2 pt-6 sticky bottom-0 bg-white dark:bg-slate-800 pb-6 px-6 -mx-6 border-t dark:border-slate-700 rounded-b-xl">
-								<Button
-									type="button"
-									variant="outline"
-									onClick={() => setOpen(false)}
-									className="mr-2 border-gray-300 dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-700"
-									disabled={isSubmitting}
-								>
-									Batal
-								</Button>
-								<Button
-									type="submit"
-									className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-emerald-500 dark:hover:bg-emerald-600 shadow-md hover:shadow-lg"
-									disabled={isSubmitting}
-								>
-									{isSubmitting ? (
-										<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-									) : (
-										<CheckCircle2 className="mr-2 h-4 w-4" />
-									)}
-									{isSubmitting ? "Menyimpan..." : submitButtonText}
-								</Button>
-							</DialogFooter>
 						</form>
 					</Form>
 				</div>
+				<DialogFooter className="pt-6 bg-white dark:bg-slate-800 pb-6 px-6 border-t dark:border-slate-700 rounded-b-xl">
+					<Button
+						type="button"
+						variant="outline"
+						onClick={() => setOpen(false)}
+						className="mr-2 border-gray-300 dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-700"
+						disabled={isSubmitting}
+					>
+						Batal
+					</Button>
+					<Button
+						type="submit"
+						className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-emerald-500 dark:hover:bg-emerald-600 shadow-md hover:shadow-lg"
+						disabled={isSubmitting}
+					>
+						{isSubmitting ? (
+							<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+						) : (
+							<CheckCircle2 className="mr-2 h-4 w-4" />
+						)}
+						{isSubmitting ? "Menyimpan..." : submitButtonText}
+					</Button>
+				</DialogFooter>
 			</DialogContent>
 		</Dialog>
 	);

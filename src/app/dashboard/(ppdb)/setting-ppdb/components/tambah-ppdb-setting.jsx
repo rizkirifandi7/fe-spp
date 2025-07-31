@@ -80,7 +80,7 @@ const TambahSettingPPDB = ({ onSuccess }) => {
 					label: "Jumlah Pembayaran",
 					currencyFormat: "IDR",
 					placeholder: "Masukkan jumlah pembayaran...",
-					fieldType: "number",
+					fieldType: "number-idr",
 					description: "Jumlah pembayaran untuk daftar",
 				},
 				{

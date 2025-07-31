@@ -58,7 +58,7 @@ const UpdateKas = ({ onSuccess, id, rowData, onDataAdded }) => {
 					name: "jumlah",
 					label: "Jumlah",
 					placeholder: "Masukkan jumlah kas...",
-					fieldType: "number",
+					fieldType: "number-idr",
 				},
 				{
 					name: "tipe",

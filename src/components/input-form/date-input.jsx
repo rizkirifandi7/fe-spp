@@ -47,6 +47,7 @@ export const DatePicker = ({ value, onChange, placeholder }) => {
 						selected: "bg-primary text-primary-foreground hover:bg-primary",
 						today: "font-bold",
 					}}
+					captionLayout="dropdown"
 					formatters={{
 						formatDay: (date) => format(date, "d", { locale: id }),
 						formatWeekdayName: (date) => format(date, "EEEEEE", { locale: id }),

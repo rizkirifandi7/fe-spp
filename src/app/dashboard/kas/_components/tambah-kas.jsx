@@ -61,7 +61,7 @@ const TambahKas = ({ onSuccess, onDataAdded }) => {
 					label: "Jumlah",
 					placeholder: "Masukkan jumlah kas...",
 					currencyFormat: "IDR",
-					fieldType: "number",
+					fieldType: "number-idr",
 				},
 				{
 					name: "tipe",

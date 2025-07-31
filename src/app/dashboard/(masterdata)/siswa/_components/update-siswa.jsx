@@ -284,4 +284,3 @@ const UpdateSiswa = ({ onSuccess, id, rowData }) => {
 };
 
 export default UpdateSiswa;
-// ...existing code...
