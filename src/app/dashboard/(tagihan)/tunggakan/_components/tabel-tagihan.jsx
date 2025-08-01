@@ -14,11 +14,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { AlertCircle, Eye, ListOrdered } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Pagination } from "@/components/ui/Pagination";
 import { formatToIDRLocal } from "@/lib/formatters";
 import { DetailTagihanModal } from "./detail-tagihan-modal";
 import { RincianItemModal } from "./rincian-item-modal";
 import { StatusBadge } from "@/components/status/status-badge";
+import { Pagination } from "./pagination";
 
 export default function TabelTagihan({
 	data,
