@@ -1,5 +1,5 @@
-import React from "react";
-import { useState } from "react";
+// app/dashboard/.../_components/FilterPencarian.jsx
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
 	Popover,
@@ -32,42 +32,42 @@ export const FilterPencarian = ({
 	filters,
 	setFilters,
 	resetFilters,
-	openSiswaPopover,
-	setOpenSiswaPopover,
-	siswaSearchTerm,
-	setSiswaSearchTerm,
 }) => {
+	// State untuk UI internal komponen ini, tidak perlu diketahui parent.
+	const [openSiswaPopover, setOpenSiswaPopover] = useState(false);
+	const [siswaSearchTerm, setSiswaSearchTerm] = useState("");
+
+	// Handler internal untuk setiap perubahan filter
+	const handleSelectChange = (key, value) => {
+		setFilters({ ...filters, [key]: value });
+	};
+
+	const handleSiswaSelect = (nama) => {
+		setFilters({ ...filters, nama });
+		setOpenSiswaPopover(false);
+		setSiswaSearchTerm("");
+	};
+
 	return (
 		<CardContent className="pt-0">
 			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-				{/* Filter Nama */}
+				{/* Filter Nama Siswa */}
 				<div>
-					<label
-						htmlFor="namaSiswaPopoverButton"
-						className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1"
-					>
+					<label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
 						Nama Siswa
 					</label>
 					<Popover open={openSiswaPopover} onOpenChange={setOpenSiswaPopover}>
 						<PopoverTrigger asChild>
 							<Button
-								id="namaSiswaPopoverButton"
 								variant="outline"
 								role="combobox"
-								aria-expanded={openSiswaPopover}
-								className={cn(
-									"w-full justify-between bg-white dark:bg-slate-700/50 dark:border-slate-600 px-3 font-normal rounded-lg shadow-sm hover:shadow-md transition-shadow",
-									!filters.nama && "text-muted-foreground"
-								)}
+								className="w-full justify-between font-normal"
 							>
-								{filters.nama
-									? siswaList.find((siswa) => siswa.nama === filters.nama)
-											?.nama || "Pilih siswa"
-									: "Pilih siswa"}
+								{filters.nama || "Pilih siswa"}
 								<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
 							</Button>
 						</PopoverTrigger>
-						<PopoverContent className="w-[--radix-popover-trigger-width] p-0 dark:bg-slate-800 border-slate-300 dark:border-slate-700 shadow-lg">
+						<PopoverContent className="w-[--radix-popover-trigger-width] p-0">
 							<Command>
 								<CommandInput
 									placeholder="Cari siswa..."
@@ -77,47 +77,30 @@ export const FilterPencarian = ({
 								<CommandList>
 									<CommandEmpty>Tidak ada siswa ditemukan.</CommandEmpty>
 									<CommandGroup>
-										{siswaList
-											.filter((siswa) => {
-												const searchTerm = siswaSearchTerm.trim().toLowerCase();
-												if (searchTerm === "") return true;
-												return (
-													siswa.nama &&
-													typeof siswa.nama === "string" &&
-													siswa.nama.toLowerCase().includes(searchTerm)
-												);
-											})
-											.map((siswa) => (
-												<CommandItem
-													key={siswa.id}
-													value={siswa.nama}
-													onSelect={() => {
-														setFilters({
-															...filters,
-															nama: siswa.nama,
-														});
-														setOpenSiswaPopover(false);
-														setSiswaSearchTerm("");
-													}}
-													className="cursor-pointer dark:text-slate-200 dark:hover:bg-slate-600"
-												>
-													<Check
-														className={cn(
-															"mr-2 h-4 w-4",
-															filters.nama === siswa.nama
-																? "opacity-100"
-																: "opacity-0"
-														)}
-													/>
-													<span>{siswa.nama}</span>
-												</CommandItem>
-											))}
+										{siswaList.map((siswa) => (
+											<CommandItem
+												key={siswa.id}
+												value={siswa.nama}
+												onSelect={() => handleSiswaSelect(siswa.nama)}
+											>
+												<Check
+													className={cn(
+														"mr-2 h-4 w-4",
+														filters.nama === siswa.nama
+															? "opacity-100"
+															: "opacity-0"
+													)}
+												/>
+												{siswa.nama}
+											</CommandItem>
+										))}
 									</CommandGroup>
 								</CommandList>
 							</Command>
 						</PopoverContent>
 					</Popover>
 				</div>
+
 				{/* Filter Kelas */}
 				<div>
 					<label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
@@ -125,29 +108,22 @@ export const FilterPencarian = ({
 					</label>
 					<Select
 						value={filters.kelas}
-						onValueChange={(value) => setFilters({ ...filters, kelas: value })}
+						onValueChange={(value) => handleSelectChange("kelas", value)}
+						className="w-full"
 					>
-						<SelectTrigger
-							className={cn(
-								"w-full justify-between bg-white dark:bg-slate-700/50 dark:border-slate-600 h-11 px-3 font-normal rounded-lg shadow-sm hover:shadow-md transition-shadow",
-								!filters.kelas && "text-muted-foreground"
-							)}
-						>
+						<SelectTrigger className="w-full">
 							<SelectValue placeholder="Pilih Kelas" />
 						</SelectTrigger>
-						<SelectContent className="dark:bg-slate-800">
+						<SelectContent>
 							{kelasList.map((kelas) => (
-								<SelectItem
-									key={kelas.id}
-									value={kelas.id.toString()}
-									className="dark:focus:bg-green-900/30"
-								>
+								<SelectItem key={kelas.id} value={kelas.id.toString()}>
 									{kelas.nama_kelas}
 								</SelectItem>
 							))}
 						</SelectContent>
 					</Select>
 				</div>
+
 				{/* Filter Jurusan */}
 				<div>
 					<label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
@@ -155,71 +131,44 @@ export const FilterPencarian = ({
 					</label>
 					<Select
 						value={filters.jurusan}
-						onValueChange={(value) =>
-							setFilters({ ...filters, jurusan: value })
-						}
+						onValueChange={(value) => handleSelectChange("jurusan", value)}
 					>
-						<SelectTrigger
-							className={cn(
-								"w-full justify-between bg-white dark:bg-slate-700/50 dark:border-slate-600 h-11 px-3 font-normal rounded-lg shadow-sm hover:shadow-md transition-shadow",
-								!filters.jurusan && "text-muted-foreground"
-							)}
-						>
+						<SelectTrigger className="w-full">
 							<SelectValue placeholder="Pilih Jurusan" />
 						</SelectTrigger>
-						<SelectContent className="dark:bg-slate-800">
+						<SelectContent>
 							{jurusanList.map((jurusan) => (
-								<SelectItem
-									key={jurusan.id}
-									value={jurusan.id.toString()}
-									className="dark:focus:bg-green-900/30"
-								>
+								<SelectItem key={jurusan.id} value={jurusan.id.toString()}>
 									{jurusan.nama_jurusan}
 								</SelectItem>
 							))}
 						</SelectContent>
 					</Select>
 				</div>
+
 				{/* Filter Status */}
 				<div>
 					<label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-						Status Tagihan
+						Status
 					</label>
 					<Select
 						value={filters.status}
-						onValueChange={(value) => setFilters({ ...filters, status: value })}
+						onValueChange={(value) => handleSelectChange("status", value)}
 					>
-						<SelectTrigger
-							className={cn(
-								"w-full justify-between bg-white dark:bg-slate-700/50 dark:border-slate-600 h-11 px-3 font-normal rounded-lg shadow-sm hover:shadow-md transition-shadow",
-								!filters.status && "text-muted-foreground"
-							)}
-						>
+						<SelectTrigger className="w-full">
 							<SelectValue placeholder="Pilih Status" />
 						</SelectTrigger>
-						<SelectContent className="dark:bg-slate-800">
-							<SelectItem value="all" className="dark:focus:bg-green-900/30">
-								Semua Status
-							</SelectItem>
-							<SelectItem value="paid" className="dark:focus:bg-green-900/30">
-								Lunas
-							</SelectItem>
-							<SelectItem
-								value="pending"
-								className="dark:focus:bg-green-900/30"
-							>
-								Belum Lunas
-							</SelectItem>
+						<SelectContent>
+							<SelectItem value="all">Semua Status</SelectItem>
+							<SelectItem value="paid">Lunas</SelectItem>
+							<SelectItem value="belum_lunas">Belum Lunas</SelectItem>
+							<SelectItem value="pending">Pending</SelectItem>
 						</SelectContent>
 					</Select>
 				</div>
 			</div>
-			<div className="flex justify-end gap-2 mt-4">
-				<Button
-					variant="outline"
-					onClick={resetFilters}
-					className="bg-emerald-600 text-white dark:text-green-400 border-slate-200 dark:border-green-800 hover:bg-white dark:hover:bg-green-900/30"
-				>
+			<div className="flex justify-end mt-4">
+				<Button variant="outline" onClick={resetFilters} className={"bg-emerald-600 text-white"}>
 					Reset Filter
 				</Button>
 			</div>

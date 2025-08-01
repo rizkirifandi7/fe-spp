@@ -6,9 +6,9 @@ import { useUnits } from "@/hooks/useUnits";
 
 const FormSchema = z.object({
 	id_unit: z.string().min(1, "Unit harus dipilih"),
-	jumlah_pembayaran: z.number().min(1, "Jumlah pembayaran harus diisi"),
+	jumlah_pembayaran: z.coerce.number().min(1, "Jumlah pembayaran harus diisi"),
 	tahun_ajaran: z.string().min(1, "Tahun ajaran harus diisi"),
-	target_siswa: z.number().min(1, "Target siswa harus diisi"),
+	target_siswa: z.coerce.number().min(1, "Target siswa harus diisi"),
 	status: z.enum(["on", "off"]),
 });
 

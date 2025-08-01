@@ -6,9 +6,9 @@ import { useUnits } from "@/hooks/useUnits";
 
 const kelasFormSchema = z.object({
 	id_unit: z.string().min(1, "Unit harus dipilih"),
-	jumlah_pembayaran: z.number().min(1, "Jumlah pembayaran harus diisi"),
+	jumlah_pembayaran: z.coerce.number().min(1, "Jumlah pembayaran harus diisi"),
 	tahun_ajaran: z.string().min(1, "Tahun ajaran harus diisi"),
-	target_siswa: z.number().min(1, "Target siswa harus diisi"),
+	target_siswa: z.coerce.number().min(1, "Target siswa harus diisi"),
 	status: z.enum(["on", "off"]),
 });
 
@@ -42,9 +42,9 @@ const TambahSettingPPDB = ({ onSuccess }) => {
 	return (
 		<GenericFormDialog
 			triggerVariant="add"
-			triggerText="Tambah Kelas"
-			dialogTitle="Tambah Kelas"
-			dialogDescription="Tambahkan kelas baru ke sistem."
+			triggerText="Tambah Setting PPDB"
+			dialogTitle="Tambah Setting PPDB"
+			dialogDescription="Tambahkan setting PPDB baru ke sistem."
 			formSchema={kelasFormSchema}
 			defaultValues={{
 				id_unit: "",

@@ -34,8 +34,6 @@ import {
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-import { Checkbox } from "@/components/ui/checkbox";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, Pencil } from "lucide-react";
@@ -277,14 +275,15 @@ const GenericFormDialog = ({
 			<DialogTrigger asChild>{renderTriggerButton()}</DialogTrigger>
 			<DialogContent
 				className={cn(
-					"bg-white dark:bg-slate-800 border dark:border-slate-700 shadow-2xl rounded-xl p-0 max-h-[100vh] flex flex-col",
+					"bg-white dark:bg-slate-800 border dark:border-slate-700 shadow-2xl rounded-xl p-0 max-h-[90vh] flex flex-col", // Dibuat 90vh agar ada ruang
 					dialogClassName
 				)}
 			>
-				<DialogHeader className="px-6 py-5 border-b dark:border-slate-700 sticky top-0 bg-white dark:bg-slate-800 z-10 rounded-t-xl">
+				<DialogHeader className="px-6 py-5 border-b dark:border-slate-700">
 					<DialogTitle className="text-xl font-semibold text-gray-800 dark:text-slate-100">
 						{dialogTitle}
 					</DialogTitle>
+
 					{dialogDescription && (
 						<DialogDescription className="text-sm text-gray-500 dark:text-slate-400 mt-1">
 							{dialogDescription}
@@ -292,98 +291,115 @@ const GenericFormDialog = ({
 					)}
 				</DialogHeader>
 
-				<div className="flex-grow overflow-y-auto px-6 py-5">
-					<Form {...form}>
-						<form
-							onSubmit={form.handleSubmit(handleSubmitWrapper)}
-							className={cn(
-								layoutType === "grid" &&
-									"grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5", // Default grid, bisa di-override
-								layoutType === "vertical" && "flex flex-col space-y-5",
-								formClassName
-							)}
-						>
-							{fields.map((field) => {
-								if (field.fieldType === "separator") {
+				<Form {...form}>
+					<form
+						onSubmit={form.handleSubmit(handleSubmitWrapper)}
+						className="flex flex-col flex-grow overflow-hidden" // Memastikan form mengisi sisa ruang
+					>
+						{/* Area konten yang bisa di-scroll */}
+						<div className="flex-grow overflow-y-auto px-6 py-5">
+							<div
+								className={cn(
+									layoutType === "grid" &&
+										"grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5",
+									layoutType === "vertical" && "flex flex-col space-y-5",
+									formClassName
+								)}
+							>
+								{fields.map((field) => {
+									if (field.fieldType === "separator") {
+										return (
+											<div
+												key={field.label || Math.random()}
+												className={cn(
+													"md:col-span-2 pt-3 pb-1",
+													field.className
+												)}
+											>
+												<h3 className="text-lg font-semibold text-emerald-600 dark:text-emerald-500 mb-1">
+													{field.label}
+												</h3>
+
+												<Separator className="bg-gray-200 dark:bg-slate-700" />
+											</div>
+										);
+									}
 									return (
-										<div
-											key={field.label || Math.random()}
-											className={cn("md:col-span-2 pt-3 pb-1", field.className)}
-										>
-											<h3 className="text-lg font-semibold text-emerald-600 dark:text-emerald-500 mb-1">
-												{field.label}
-											</h3>
-											<Separator className="bg-gray-200 dark:bg-slate-700" />
-										</div>
-									);
-								}
-								return (
-									<FormField
-										key={field.name}
-										control={form.control}
-										name={field.name}
-										render={({ field: renderFieldProps }) => (
-											<FormItem className={cn(field.className)}>
-												{field.fieldType !== "checkbox" && (
-													<FormLabel className="text-sm font-medium text-gray-700 dark:text-slate-300 flex items-center">
-														{field.icon && (
-															<field.icon className="h-4 w-4 mr-2 text-emerald-600 dark:text-emerald-500 opacity-80" />
-														)}
-														{field.label}
-														{formSchema.shape[field.name] &&
-															!formSchema.shape[field.name].isOptional() && (
-																<span className="text-red-500 ml-1">*</span>
+										<FormField
+											key={field.name}
+											control={form.control}
+											name={field.name}
+											render={({ field: renderFieldProps }) => (
+												<FormItem className={cn(field.className)}>
+													{field.fieldType !== "checkbox" && (
+														<FormLabel className="text-sm font-medium text-gray-700 dark:text-slate-300 flex items-center">
+															{field.icon && (
+																<field.icon className="h-4 w-4 mr-2 text-emerald-600 dark:text-emerald-500 opacity-80" />
 															)}
-													</FormLabel>
-												)}
-												<FormControl>
-													{renderFormControl(field, renderFieldProps)}
-												</FormControl>
-												{field.description && (
-													<FormDescription className="text-xs text-gray-500 dark:text-slate-400 mt-1">
-														{field.description}
-														{field.link && (
-															<Link
-																href={field.link.href}
-																className="text-emerald-600 hover:text-emerald-700 underline ml-1"
-															>
-																{field.link.text}
-															</Link>
-														)}
-													</FormDescription>
-												)}
-												<FormMessage className="text-xs" />
-											</FormItem>
-										)}
-									/>
-								);
-							})}
-						</form>
-					</Form>
-				</div>
-				<DialogFooter className="pt-6 bg-white dark:bg-slate-800 pb-6 px-6 border-t dark:border-slate-700 rounded-b-xl">
-					<Button
-						type="button"
-						variant="outline"
-						onClick={() => setOpen(false)}
-						className="mr-2 border-gray-300 dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-700"
-						disabled={isSubmitting}
-					>
-						Batal
-					</Button>
-					<Button
-						type="submit"
-						className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-emerald-500 dark:hover:bg-emerald-600 shadow-md hover:shadow-lg"
-						disabled={isSubmitting}
-					>
-						{isSubmitting ? (
-							<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-						) : (
-							<CheckCircle2 className="mr-2 h-4 w-4" />
-						)}
-						{isSubmitting ? "Menyimpan..." : submitButtonText}
-					</Button>
-				</DialogFooter>
+															{field.label}
+
+															{formSchema.shape[field.name] &&
+																!formSchema.shape[field.name].isOptional() && (
+																	<span className="text-red-500 ml-1">*</span>
+																)}
+														</FormLabel>
+													)}
+
+													<FormControl>
+														{renderFormControl(field, renderFieldProps)}
+													</FormControl>
+
+													{field.description && (
+														<FormDescription className="text-xs text-gray-500 dark:text-slate-400 mt-1">
+															{field.description}
+
+															{field.link && (
+																<Link
+																	href={field.link.href}
+																	className="text-emerald-600 hover:text-emerald-700 underline ml-1"
+																>
+																	{field.link.text}
+																</Link>
+															)}
+														</FormDescription>
+													)}
+
+													<FormMessage className="text-xs" />
+												</FormItem>
+											)}
+										/>
+									);
+								})}
+							</div>
+						</div>
+						{/* --- [PERUBAHAN 2] --- DialogFooter sekarang berada DI DALAM tag <form> --- */}
+						<DialogFooter className="flex-shrink-0 pt-6 bg-white dark:bg-slate-800 pb-6 px-6 border-t dark:border-slate-700">
+							<Button
+								type="button"
+								variant="outline"
+								onClick={() => setOpen(false)}
+								className="mr-2 border-gray-300 dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-700"
+								disabled={isSubmitting}
+							>
+								Batal
+							</Button>
+							{/* --- [PERUBAHAN 3] --- Tombol ini sekarang berfungsi karena ada di dalam form --- */}
+
+							<Button
+								type="submit"
+								className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-emerald-500 dark:hover:bg-emerald-600 shadow-md hover:shadow-lg"
+								disabled={isSubmitting}
+							>
+								{isSubmitting ? (
+									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+								) : (
+									<CheckCircle2 className="mr-2 h-4 w-4" />
+								)}
+								{isSubmitting ? "Menyimpan..." : submitButtonText}
+							</Button>
+						</DialogFooter>
+					</form>
+				</Form>
 			</DialogContent>
 		</Dialog>
 	);

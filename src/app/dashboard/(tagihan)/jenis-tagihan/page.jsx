@@ -2,17 +2,13 @@
 
 import { useEffect, useCallback, useState } from "react";
 import axios from "axios";
-import { useRouter } from "next/navigation";
-import { Plus } from "lucide-react";
 import TableView from "@/components/data-table/table-view";
-import { Button } from "@/components/ui/button";
 
 import TambahTipePembayaran from "./_components/tambah-jenis-pembayaran";
 import UpdateTipePembayaran from "./_components/update-jenis-pembayaran";
 import HapusTipePembayaran from "./_components/hapus-jenis-pembayaran";
 
 const PageTipePembayaran = () => {
-	const router = useRouter();
 	const [data, setData] = useState([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState(null);
@@ -21,15 +17,13 @@ const PageTipePembayaran = () => {
 		{
 			accessorKey: "nama",
 			header: "Jenis Pembayaran",
-			cell: ({ row }) => (
-				<div className="w-[200px] overflow-x-auto">{row.getValue("nama")}</div>
-			),
+			cell: ({ row }) => <div className="">{row.getValue("nama")}</div>,
 		},
 		{
 			accessorKey: "deskripsi",
 			header: "Deskripsi",
 			cell: ({ row }) => (
-				<div className="w-[200px] overflow-x-auto">
+				<div className="w-[600px] overflow-x-auto">
 					{row.getValue("deskripsi")}
 				</div>
 			),
