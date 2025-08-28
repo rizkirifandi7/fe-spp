@@ -59,7 +59,7 @@ const TableDaftarPPDB = ({ onDataAdded }) => {
 		const pesan = `
 Assalamu’alaikum Warahmatullahi Wabarakatuh
 
-Yth. Bapak/Ibu Orang Tua/Wali dari Ananda *${rowData.nama}*
+Yth. Wali dari siswa  *${rowData.nama}*
 Kelas: *${rowData.kelas || "N/A"} ${
 			rowData.jurusan ? `- ${rowData.jurusan}` : ""
 		}*
@@ -80,7 +80,7 @@ Mohon abaikan pesan ini jika Anda telah melakukan pembayaran.
 Terima kasih atas perhatian dan kerjasamanya. Semoga Allah SWT senantiasa memberikan kesehatan dan keberkahan.
 
 Hormat kami,
-Tim Keuangan Sekolah
+Staf TU, MA Daarul Ulum.
 `.trim();
 
 		const targetTelepon = rowData.telepon.startsWith("0")
