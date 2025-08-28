@@ -52,19 +52,14 @@ const sendWhatsAppNotification = async (pembayaranData) => {
 		)
 		.join("\n\n");
 
-	// Buat link detail pembayaran
-	const detailUrl = `https://www.ypimadaarululum.web.id/id=${
-		tagihan.id
-	}/item-tagihan=${paidItems[0]?.id || ""}`;
-
 	// Status tagihan
 	const statusTagihan = tagihan.status === "paid" ? "Paid" : tagihan.status;
 
 	// Susun pesan
 	const message = `
 Assalamu’alaikum Wr. Wb.
-Yth. Wali dari siswa ${siswa.nama}
-Kelas: ${siswa.akun_siswa.kelas.nama_kelas}
+Yth. Wali dari siswa *${siswa.nama}*
+Kelas: *${siswa.akun_siswa.kelas.nama_kelas}*
 
 Pembayaran untuk item:
 ${itemDetails}
@@ -73,18 +68,17 @@ Berikut adalah rincian tagihan induk (${tagihan.nomor_tagihan}):
 
 Tanggal Terbit: ${formatTanggal(tagihan.createdAt)}
 Tanggal Tenggat: ${formatTanggal(paidItems[0]?.jatuh_tempo)}
-Total Tagihan: ${new Intl.NumberFormat("id-ID", {
+Total Tagihan: *${new Intl.NumberFormat("id-ID", {
 		style: "currency",
 		currency: "IDR",
 		minimumFractionDigits: 0,
-	}).format(tagihan.total_jumlah)}
-Total Terbayar: ${new Intl.NumberFormat("id-ID", {
+	}).format(tagihan.total_jumlah)}*
+Total Terbayar: *${new Intl.NumberFormat("id-ID", {
 		style: "currency",
 		currency: "IDR",
 		minimumFractionDigits: 0,
-	}).format(tagihan.jumlah_bayar)}
-Status: ${statusTagihan === "Paid" ? "Lunas" : "Belum Lunas"}
-Detail Pembayaran : ${detailUrl}
+	}).format(tagihan.jumlah_bayar)}*
+Status: *${statusTagihan === "Paid" ? "Lunas" : "Belum Lunas"}*
 
 Terima kasih telah melakukan pembayaran.
 Semoga Allah SWT senantiasa memberikan kemudahan dan keberkahan.
