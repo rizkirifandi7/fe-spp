@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/tooltip";
 import Image from "next/image";
 import Link from "next/link";
+import { getCookie } from "@/actions/cookies";
 
 const PageSiswa = () => {
 	const router = useRouter();
@@ -26,28 +27,6 @@ const PageSiswa = () => {
 	const [error, setError] = useState(null);
 
 	const columns = [
-		{
-			accessorKey: "gambar",
-			header: "Foto",
-			cell: ({ row }) => {
-				const imageUrl = row.original?.akun_siswa?.gambar;
-				return (
-					<div className="overflow-x-auto">
-						{imageUrl ? (
-							<Image
-								width={40}
-								height={40}
-								src={imageUrl}
-								alt="Foto Siswa"
-								className="h-10 w-10 object-cover rounded" // Adjust styling as needed
-							/>
-						) : (
-							"Tidak ada foto"
-						)}
-					</div>
-				);
-			},
-		},
 		{
 			accessorKey: "nisn",
 			header: "NISN",
@@ -74,15 +53,6 @@ const PageSiswa = () => {
 			header: "Telepon",
 			cell: ({ row }) => (
 				<div className="overflow-x-auto">{row.getValue("telepon")}</div>
-			),
-		},
-		{
-			accessorKey: "unit",
-			header: "Unit",
-			cell: ({ row }) => (
-				<div className="overflow-x-auto">
-					{row.original?.akun_siswa?.unit?.nama_unit}
-				</div>
 			),
 		},
 		{
@@ -190,8 +160,12 @@ const PageSiswa = () => {
 		try {
 			setIsLoading(true);
 			setError(null);
+			const token = (await getCookie("token"))?.value;
+			const headers = { Authorization: `Bearer ${token}` };
+
 			const response = await axios.get(
-				`${process.env.NEXT_PUBLIC_API_URL}/akun/siswa`
+				`${process.env.NEXT_PUBLIC_API_URL}/akun/siswa`,
+				{ headers }
 			);
 
 			setData(response.data.data);

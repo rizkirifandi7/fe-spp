@@ -56,7 +56,7 @@ export const RincianItemModal = ({
 
 		const pesan = `
 Assalamu’alaikum Warahmatullahi Wabarakatuh
-Yth. Bapak/Ibu Orang Tua/Wali dari Ananda *${tagihan.siswa.nama}*
+Yth. Wali dari Siswa *${tagihan.siswa.nama}*
 Kelas: *${tagihan.siswa.akun_siswa.kelas.nama_kelas} - ${
 			tagihan.siswa.akun_siswa.jurusan.nama_jurusan
 		}*
@@ -64,15 +64,16 @@ Kelas: *${tagihan.siswa.akun_siswa.kelas.nama_kelas} - ${
 Kami informasikan bahwa terdapat tagihan:
 🧾 Deskripsi: *${item.deskripsi}*
 💰 Jumlah: *${formatToIDRLocal(item.jumlah)}*
+📅 Tanggal Terbit: *${formatDateLocal(item.createdAt)}*
 🗓️ Jatuh Tempo: *${formatDateLocal(item.jatuh_tempo)}*
 
-Status tagihan saat ini: BELUM LUNAS.
+Status tagihan saat ini: *BELUM LUNAS*.
 Silakan segera lakukan pembayaran melalui link berikut:
 ${item.midtrans_url}
 
 Terima kasih atas perhatiannya.
 Hormat kami,
-Tim Keuangan Sekolah`.trim();
+Staf TU, MA Daarul Ulum.`.trim();
 
 		const targetTelepon = tagihan.siswa.telepon.startsWith("0")
 			? `62${tagihan.siswa.telepon.substring(1)}`

@@ -103,7 +103,7 @@ export function TagihanItemTable({
 															value={jenis.id.toString()}
 															className="dark:focus:bg-slate-700"
 														>
-															{jenis.nama}
+															{jenis.deskripsi}
 														</SelectItem>
 													))}
 												</SelectContent>

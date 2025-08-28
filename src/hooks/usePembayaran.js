@@ -6,10 +6,10 @@ import { useRouter } from "next/navigation";
 import { getCookie } from "@/actions/cookies";
 import { toast } from "sonner";
 
+// ...existing code...
 const sendWhatsAppNotification = async (pembayaranData) => {
 	const { siswa, tagihan, formData, selectedItems } = pembayaranData;
 
-	// 1. Pastikan nomor telepon ada
 	if (!siswa?.telepon) {
 		console.warn(
 			"Nomor telepon siswa tidak ditemukan, notifikasi WhatsApp dilewati."
@@ -17,55 +17,82 @@ const sendWhatsAppNotification = async (pembayaranData) => {
 		return;
 	}
 
-	// 2. Dapatkan deskripsi item yang baru saja dibayar
-	const paidItemsDescriptions = tagihan.item_tagihan
-		.filter((item) => selectedItems.includes(item.id))
+	// Ambil item yang dibayar
+	const paidItems = tagihan.item_tagihan.filter((item) =>
+		selectedItems.includes(item.id)
+	);
+	const pembayaranTerakhir = tagihan.pembayaran?.length
+		? tagihan.pembayaran[tagihan.pembayaran.length - 1]
+		: null;
+
+	// Format tanggal
+	const formatTanggal = (dateStr) => {
+		if (!dateStr) return "-";
+		const date = new Date(dateStr);
+		return date.toLocaleDateString("id-ID", {
+			day: "2-digit",
+			month: "long",
+			year: "numeric",
+		});
+	};
+
+	// Buat detail item yang dibayar
+	const itemDetails = paidItems
 		.map(
 			(item) =>
-				`- ${item.deskripsi} (${new Intl.NumberFormat("id-ID", {
+				`🧾 Deskripsi: ${item.deskripsi}\n` +
+				`💰 Jumlah: ${new Intl.NumberFormat("id-ID", {
 					style: "currency",
 					currency: "IDR",
 					minimumFractionDigits: 0,
-				}).format(item.jumlah)})`
+				}).format(item.jumlah)}\n` +
+				`Terbit tanggal : ${formatTanggal(item.createdAt)}\n` +
+				`Dibayar tanggal: ${formatTanggal(pembayaranTerakhir?.createdAt)}\n` +
+				`Telah BERHASIL kami terima.`
 		)
-		.join("\n");
+		.join("\n\n");
 
-	// 3. Susun pesan notifikasi
+	// Buat link detail pembayaran
+	const detailUrl = `https://www.ypimadaarululum.web.id/id=${
+		tagihan.id
+	}/item-tagihan=${paidItems[0]?.id || ""}`;
+
+	// Status tagihan
+	const statusTagihan = tagihan.status === "paid" ? "Paid" : tagihan.status;
+
+	// Susun pesan
 	const message = `
-✅ *Pembayaran Berhasil Diterima*
+Assalamu’alaikum Wr. Wb.
+Yth. Wali dari siswa ${siswa.nama}
+Kelas: ${siswa.akun_siswa.kelas.nama_kelas}
 
-Yth. Bapak/Ibu Wali dari Ananda *${siswa.nama}*
-Kelas: *${siswa.akun_siswa.kelas.nama_kelas}*
+Pembayaran untuk item:
+${itemDetails}
 
-Kami konfirmasi bahwa kami telah menerima pembayaran untuk tagihan *${
-		tagihan.nomor_tagihan
-	}* dengan rincian:
+Berikut adalah rincian tagihan induk (${tagihan.nomor_tagihan}):
 
-*Jumlah Dibayar:* ${new Intl.NumberFormat("id-ID", {
+Tanggal Terbit: ${formatTanggal(tagihan.createdAt)}
+Tanggal Tenggat: ${formatTanggal(paidItems[0]?.jatuh_tempo)}
+Total Tagihan: ${new Intl.NumberFormat("id-ID", {
 		style: "currency",
 		currency: "IDR",
 		minimumFractionDigits: 0,
-	}).format(formData.jumlah)}
-*Metode:* ${
-		formData.metode_pembayaran.charAt(0).toUpperCase() +
-		formData.metode_pembayaran.slice(1)
-	}
-*Tanggal:* ${new Date().toLocaleDateString("id-ID", {
-		day: "2-digit",
-		month: "long",
-		year: "numeric",
-	})}
+	}).format(tagihan.total_jumlah)}
+Total Terbayar: ${new Intl.NumberFormat("id-ID", {
+		style: "currency",
+		currency: "IDR",
+		minimumFractionDigits: 0,
+	}).format(tagihan.jumlah_bayar)}
+Status: ${statusTagihan === "Paid" ? "Lunas" : "Belum Lunas"}
+Detail Pembayaran : ${detailUrl}
 
-*Item yang Dibayar:*
-${paidItemsDescriptions}
-
-Terima kasih atas pembayaran Anda.
+Terima kasih telah melakukan pembayaran.
+Semoga Allah SWT senantiasa memberikan kemudahan dan keberkahan.
 
 Hormat kami,
-*Tim Keuangan Sekolah*
-  `.trim();
+Staf TU, MA Daarul Ulum.
+    `.trim();
 
-	// 4. Format nomor telepon & siapkan data untuk API Fonnte
 	const targetTelepon = siswa.telepon.startsWith("0")
 		? `62${siswa.telepon.substring(1)}`
 		: siswa.telepon;
@@ -73,7 +100,6 @@ Hormat kami,
 	fonnteFormData.append("target", targetTelepon);
 	fonnteFormData.append("message", message);
 
-	// 5. Kirim ke Fonnte (dengan error handling)
 	try {
 		const response = await fetch("https://api.fonnte.com/send", {
 			method: "POST",
@@ -87,12 +113,12 @@ Hormat kami,
 		toast.info("Notifikasi WhatsApp berhasil dikirim.");
 	} catch (error) {
 		console.error("WhatsApp notification failed:", error);
-		// Gagal kirim notifikasi tidak boleh menghentikan alur sukses pembayaran
 		toast.warning(
 			"Pembayaran berhasil, namun notifikasi WhatsApp gagal terkirim."
 		);
 	}
 };
+// ...existing code...
 
 export const usePembayaran = (idTagihan) => {
 	const router = useRouter();
@@ -158,7 +184,7 @@ export const usePembayaran = (idTagihan) => {
 			.filter((item) => selectedItems.includes(item.id))
 			.reduce((sum, item) => sum + parseFloat(item.jumlah), 0);
 
-		return { totalUnpaid, selectedTotal, unpaidItems }; 
+		return { totalUnpaid, selectedTotal, unpaidItems };
 	}, [tagihan, selectedItems]);
 
 	// Update jumlah di form secara otomatis ketika item dipilih
@@ -216,8 +242,20 @@ export const usePembayaran = (idTagihan) => {
 				if (!result.success)
 					throw new Error(result.error || "Gagal melakukan pembayaran");
 
+				// Fetch ulang data tagihan setelah pembayaran
+				const tagihanResponse = await fetch(
+					`${process.env.NEXT_PUBLIC_API_URL}/tagihan/${idTagihan}`
+				);
+				const tagihanData = await tagihanResponse.json();
+				const updatedTagihan = tagihanData.success ? tagihanData.data : tagihan;
+
 				toast.success("Pembayaran berhasil diproses!");
-				sendWhatsAppNotification({ siswa, tagihan, formData, selectedItems });
+				sendWhatsAppNotification({
+					siswa,
+					tagihan: updatedTagihan,
+					formData,
+					selectedItems,
+				});
 				router.push(`/dashboard/pembayaran`);
 			} catch (error) {
 				toast.error("Pembayaran gagal", { description: error.message });
@@ -225,7 +263,7 @@ export const usePembayaran = (idTagihan) => {
 				setIsSubmitting(false);
 			}
 		},
-		[formData, selectedItems, idTagihan, router]
+		[formData, selectedItems, idTagihan, router, siswa, tagihan]
 	);
 
 	return {

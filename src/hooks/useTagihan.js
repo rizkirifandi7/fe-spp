@@ -13,7 +13,7 @@ import { getCookie } from "@/actions/cookies";
 const itemSchema = z.object({
 	id_jenis_pembayaran: z.string().min(1, "Harus memilih jenis pembayaran"),
 	deskripsi: z.string().min(3, "Deskripsi minimal 3 karakter"),
-	jumlah: z.number().min(1000, "Jumlah minimal Rp 1.000"),
+	jumlah: z.number().min(1000, "Jumlah minimal Rp 1.000"), // Menggunakan coerce untuk konversi otomatis
 	bulan: z.string().optional(),
 	tahun: z.string().optional(),
 	jatuh_tempo: z.date({ required_error: "Jatuh tempo harus diisi" }),
@@ -48,6 +48,7 @@ export function useTagihan() {
 	const [openKelasPopover, setOpenKelasPopover] = useState(false);
 	const [openJurusanPopover, setOpenJurusanPopover] = useState(false);
 
+	// Fungsi untuk mendapatkan nilai default
 	const getDefaultValues = (isBulanan) => {
 		const now = new Date();
 		return {
@@ -62,10 +63,13 @@ export function useTagihan() {
 		};
 	};
 
+	// Form untuk siswa
 	const siswaForm = useForm({
 		resolver: zodResolver(siswaSchema),
 		defaultValues: { id_siswa: "", items: [getDefaultValues(false)] },
 	});
+
+	// Form untuk kelas
 	const kelasForm = useForm({
 		resolver: zodResolver(kelasSchema),
 		defaultValues: {
@@ -75,15 +79,19 @@ export function useTagihan() {
 		},
 	});
 
+	// Field array untuk siswa
 	const siswaFields = useFieldArray({
 		control: siswaForm.control,
 		name: "items",
 	});
+
+	// Field array untuk kelas
 	const kelasFields = useFieldArray({
 		control: kelasForm.control,
 		name: "items",
 	});
 
+	// Fetch data jenis-pembayaran, akun-siswa, kelas, dan jurusan
 	const fetchData = async () => {
 		try {
 			setIsFetching(true);
@@ -133,8 +141,7 @@ export function useTagihan() {
 				}
 			}
 
-			if (siswaData.message === "Data siswa ditemukan")
-				setSiswaList(siswaData.data);
+			if (siswaData.message === "Data siswa ditemukan") setSiswaList(siswaData.data);
 			if (kelasData.message && kelasData.data) setKelasList(kelasData.data);
 			if (jurusanData.message === "Data ditemukan" && jurusanData.data)
 				setJurusanList(jurusanData.data);
@@ -150,6 +157,7 @@ export function useTagihan() {
 		fetchData();
 	}, [jenisParam]);
 
+	// Fungsi untuk mengubah jenis pembayaran
 	const handleJenisChange = (value, form, index) => {
 		const jenis = jenisPembayaran.find((j) => j.id.toString() === value);
 		setSelectedJenis(jenis);
@@ -169,6 +177,7 @@ export function useTagihan() {
 		}
 	};
 
+	// Fungsi untuk menambahkan item tagihan
 	const addItemRow = (fields, form) => {
 		fields.append({
 			...getDefaultValues(selectedJenis?.isBulanan),
@@ -177,6 +186,7 @@ export function useTagihan() {
 		});
 	};
 
+	// Fungsi untuk mengirim tagihan
 	const submitTagihan = async (url, data) => {
 		setIsLoading(true);
 		try {
@@ -190,7 +200,7 @@ export function useTagihan() {
 				body: JSON.stringify(data),
 			});
 			const result = await response.json();
-			if (result.success) {
+			if (result.status === true) {
 				toast.success("Tagihan berhasil dibuat");
 				router.push(
 					url.includes("per-kelas")
@@ -207,12 +217,13 @@ export function useTagihan() {
 		}
 	};
 
+	// Fungsi untuk mengirim tagihan per siswa
 	const onSubmitPerSiswa = (data) => {
 		const firstItemPaymentTypeId = data.items[0].id_jenis_pembayaran;
 		const paymentTypeDetails = jenisPembayaran.find(
 			(jp) => jp.id.toString() === firstItemPaymentTypeId
 		);
-		submitTagihan(`${process.env.NEXT_PUBLIC_API_URL}/tagihan`, {
+		submitTagihan(`${process.env.NEXT_PUBLIC_API_URL}/tagihan/per-siswa`, {
 			id_siswa: parseInt(data.id_siswa),
 			id_jenis_pembayaran: parseInt(firstItemPaymentTypeId),
 			deskripsi: paymentTypeDetails ? paymentTypeDetails.nama : "",
@@ -227,6 +238,7 @@ export function useTagihan() {
 		});
 	};
 
+	// Fungsi untuk mengirim tagihan per kelas
 	const onSubmitPerKelas = (data) => {
 		submitTagihan(`${process.env.NEXT_PUBLIC_API_URL}/tagihan/per-kelas`, {
 			id_kelas: parseInt(data.id_kelas),
@@ -242,6 +254,7 @@ export function useTagihan() {
 		});
 	};
 
+	// Fungsi memilih siswa
 	const handleSelectSiswa = (siswa) => {
 		siswaForm.setValue("id_siswa", siswa.id.toString());
 		setSelectedSiswaDetails(siswa);
